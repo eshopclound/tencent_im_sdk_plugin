@@ -39,7 +39,7 @@ flutter:
         package: com.qq.qcloud.tencent_im_sdk_plugin
         pluginClass: tencent_im_sdk_plugin
       ios:
-        pluginClass: TencentImSDKPlugin
+        pluginClass: TencentImSDKPluginOC
       web:
         default_package: tencent_im_sdk_plugin_web
 
