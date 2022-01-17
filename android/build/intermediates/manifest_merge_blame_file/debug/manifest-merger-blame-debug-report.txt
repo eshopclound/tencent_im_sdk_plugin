@@ -1,0 +1,18 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.qq.qcloud.tencent_im_sdk_plugin" >
+4
+5    <uses-sdk android:minSdkVersion="16" />
+5-->/Users/frank/.pub-cache/hosted/pub.dartlang.org/tencent_im_sdk_plugin-3.6.7/android/src/main/AndroidManifest.xml
+6
+7    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+7-->/Users/frank/.pub-cache/hosted/pub.dartlang.org/tencent_im_sdk_plugin-3.6.7/android/src/main/AndroidManifest.xml:3:5-79
+7-->/Users/frank/.pub-cache/hosted/pub.dartlang.org/tencent_im_sdk_plugin-3.6.7/android/src/main/AndroidManifest.xml:3:22-76
+8    <uses-permission android:name="android.permission.INTERNET" />
+8-->/Users/frank/.pub-cache/hosted/pub.dartlang.org/tencent_im_sdk_plugin-3.6.7/android/src/main/AndroidManifest.xml:4:5-67
+8-->/Users/frank/.pub-cache/hosted/pub.dartlang.org/tencent_im_sdk_plugin-3.6.7/android/src/main/AndroidManifest.xml:4:22-64
+9    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+9-->/Users/frank/.pub-cache/hosted/pub.dartlang.org/tencent_im_sdk_plugin-3.6.7/android/src/main/AndroidManifest.xml:5:5-75
+9-->/Users/frank/.pub-cache/hosted/pub.dartlang.org/tencent_im_sdk_plugin-3.6.7/android/src/main/AndroidManifest.xml:5:22-73
+10
+11</manifest>
