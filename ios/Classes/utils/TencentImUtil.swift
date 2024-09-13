@@ -1,8 +1,65 @@
-import  ImSDK_Plus
+import ImSDK_Plus
 import Hydra
+import Flutter
 //  腾讯云工具类
-
+typealias abSuccess = () -> Void
+typealias abError = (_ code:Int32?,_ desc:String?) -> Void
+typealias GetSuccess = (_ msg:V2TIMMessage) -> Void
+typealias GetError = (_ code:Int32?,_ desc:String?) -> Void
+typealias OnProgress = (_ isFinish:Bool, _ isError:Bool, _ currentSize:Int, _ totalSize:Int,  _ msgID:String,_ type:Int,_ isSnapshot:Bool,_ path:String,_ error_code:Int32,_ error_desc:String?) -> Void
+class AbCallback {
+    var success:abSuccess;
+    var error:abError;
+    init(success:@escaping abSuccess,error:@escaping abError){
+        self.success = success;
+        self.error = error;
+    }
+}
+class GetMessageCallback {
+    var success:GetSuccess;
+    var error:GetError;
+    init(success:@escaping GetSuccess,error:@escaping GetError){
+        self.success = success;
+        self.error = error;
+    }
+}
+class DownloadCallback {
+    var onProgress:OnProgress;
+    init(onProgress: @escaping OnProgress) {
+        self.onProgress = onProgress
+    }
+}
 public class TencentImUtils {
+    
+    static func checkAbility(call: FlutterMethodCall,result: @escaping FlutterResult,callback:AbCallback){
+        callback.success()
+        // return;
+        // let params:[Int32] = CommonUtils.getParam(call: call, result: result, param: "ability") as! [Int32];
+        // if(params.isEmpty){
+        //     callback.success();
+        // }else{
+        //     let u64: UInt64 = 1
+        //     print(params[0])
+        //     var ab = u64 << params[0];
+        //     params.forEach({ item in
+        //         if(item != params[0]){
+        //             ab = ab ^ (u64 << item);
+        //         }
+        //     })
+        //     print(ab)
+        //     V2TIMManager.sharedInstance().callExperimentalAPI("isCommercialAbilityEnabled",  param: ab as NSObject) {result in
+        //         let res = result as! Int;
+        //         if(res == 0){
+                    
+        //             callback.error(70130,"the configuration to use this plugin was not obtained ("+String(params[0])+")")
+        //         }else{
+        //             callback.success()
+        //         }
+        //     } fail: { code,desc in
+        //         callback.error(code, desc)
+        //     }
+        // }
+    }
   public static func createMessage(call: FlutterMethodCall, result: @escaping FlutterResult, type: Int) -> V2TIMMessage {
 	var messageMap = call.arguments as! Dictionary<String, Any>
     var message: V2TIMMessage = V2TIMMessage()
@@ -17,30 +74,37 @@ public class TencentImUtils {
         break
       case 1:
 		if let atUserList = messageMap["atUserList"] as? NSMutableArray {
-			if messageMap["text"] as! String == "" {
+			if messageMap["text"] as? String == "" {
 				messageMap["text"] = " "
 			}
-			message = (V2TIMManager.sharedInstance()?.createText(atMessage: messageMap["text"] as? String, atUserList: atUserList))!
+            if(atUserList.contains("__kImSDK_MessageAtALL__")){
+                atUserList.remove("__kImSDK_MessageAtALL__");
+                atUserList.add(kImSDK_MesssageAtALL)
+            }else if(atUserList.contains("__kImSDK_MesssageAtALL__")){
+                atUserList.remove("__kImSDK_MesssageAtALL__");
+                atUserList.add(kImSDK_MesssageAtALL)
+            }
+            message = (V2TIMManager.sharedInstance()?.createText(atMessage: messageMap["text"] as? String, atUserList: atUserList)) ?? V2TIMMessage();
         } else {
-          message = (V2TIMManager.sharedInstance()?.createTextMessage(messageMap["text"] as? String))!
+            message = (V2TIMManager.sharedInstance()?.createTextMessage(messageMap["text"] as? String)) ?? V2TIMMessage();
         }
         break
       case 2:
         message = (V2TIMManager.sharedInstance()?.createCustomMessage(
-			(messageMap["data"] as! String).data(using: String.Encoding.utf8, allowLossyConversion: true),
+            data:(messageMap["data"] as? String)?.data(using: String.Encoding.utf8, allowLossyConversion: true),
 			desc: messageMap["desc"] as? String,
-			extension: messageMap["extension"] as? String
-		))!
+			ext: messageMap["extension"] as? String
+        ))  ?? V2TIMMessage();
         break
       case 3:
-        var imagePath = CommonUtils.getParam(call: call, result: result, param: "imagePath") as! String;
-        message = (V2TIMManager.sharedInstance()?.createImageMessage(imagePath))!
+        let imagePath = CommonUtils.getParam(call: call, result: result, param: "imagePath") as! String;
+        message = (V2TIMManager.sharedInstance()?.createImageMessage(imagePath)) ?? V2TIMMessage();
         break
       case 4:
 		message = (V2TIMManager.sharedInstance()?.createSoundMessage(
 			(messageMap["soundPath"] as? String) ?? "",
 			duration: messageMap["duration"] as! Int32
-		))!
+        )) ?? V2TIMMessage();
         break
       case 5:
         message = (V2TIMManager.sharedInstance()?.createVideoMessage(
@@ -54,16 +118,16 @@ public class TencentImUtils {
         message = (V2TIMManager.sharedInstance()?.createFileMessage(
 			messageMap["filePath"] as? String,
 			fileName: messageMap["fileName"] as? String
-        ))!
+        )) ?? V2TIMMessage();
         break
       case 7:
-		message = (V2TIMManager.sharedInstance()?.createLocationMessage(messageMap["desc"] as? String, longitude: messageMap["longitude"] as! Double, latitude: messageMap["latitude"] as! Double)!)!
+        message = (V2TIMManager.sharedInstance()?.createLocationMessage(messageMap["desc"] as? String, longitude: messageMap["longitude"] as! Double, latitude: messageMap["latitude"] as! Double)!) ?? V2TIMMessage();
         break
       case 8:
         message = (V2TIMManager.sharedInstance()?.createFaceMessage(
           messageMap["index"] as! Int32,
             data: (messageMap["data"] as! String).data(using: String.Encoding.utf8, allowLossyConversion: true)
-        ))!
+        )) ?? V2TIMMessage();
         break
       // 新增，合并消息
       case 10:
@@ -73,7 +137,7 @@ public class TencentImUtils {
 //         ))!
          break
       default:
-        message = (V2TIMManager.sharedInstance()?.createTextMessage(messageMap["text"] as! String))!
+        message = (V2TIMManager.sharedInstance()?.createTextMessage(messageMap["text"] as? String))!
     }
 
     return message

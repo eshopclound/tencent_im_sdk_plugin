@@ -1,5 +1,5 @@
 import Foundation
-import  ImSDK_Plus
+import ImSDK_Plus
 
 /// 自定义群成员信息实体
 class V2GroupMemberFullInfoEntity: V2TIMGroupMemberFullInfo {
@@ -28,14 +28,12 @@ class V2GroupMemberFullInfoEntity: V2TIMGroupMemberFullInfo {
         result["joinTime"] = info.joinTime;
         result["nameCard"] = info.nameCard;
 		for (k, v) in info.customInfo {
-			var data: NSData
-			if v is NSData {
 				customInfo[k] = String(data: v, encoding: String.Encoding.utf8)
-			} else {
-				customInfo[k] = v
-			}
 		};
 		result["customInfo"] = customInfo;
+
+        result["isOnline"] = info.isOnline;
+        result["onlineDevices"] = info.onlineDevices as? [String] ?? [];
         return result;
     }
 	
@@ -48,7 +46,15 @@ class V2GroupMemberFullInfoEntity: V2TIMGroupMemberFullInfo {
         result["friendRemark"] = simpleInfo.friendRemark;
         result["faceUrl"] = simpleInfo.faceURL;
         result["nameCard"] = simpleInfo.nameCard;
+        result["onlineDevices"] = simpleInfo.onlineDevices as? [String] ?? [];
         return result;
+    }
+    public static func getListDict(infos: [V2TIMGroupMemberFullInfo]) -> [[String: Any] ]{
+        var res: [[String: Any]] = []
+                for info in infos {
+                    res.append(V2GroupMemberFullInfoEntity.getDict(info: info))
+                }
+                return res;
     }
 }
 

@@ -1,24 +1,26 @@
-// ignore_for_file: unnecessary_cast
+// ignore_for_file: unnecessary_cast, unused_field
 
 import 'dart:convert';
 
-import 'package:flutter/services.dart';
-import 'package:tencent_im_sdk_plugin/enum/V2TimFriendshipListener.dart';
-import 'package:tencent_im_sdk_plugin/enum/friend_application_type_enum.dart';
-import 'package:tencent_im_sdk_plugin/enum/friend_response_type_enum.dart';
-import 'package:tencent_im_sdk_plugin/enum/friend_type_enum.dart';
-import 'package:tencent_im_sdk_plugin/enum/utils.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_callback.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_friend_application_result.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_friend_check_result.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_friend_group.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_friend_info.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_friend_info_result.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_friend_operation_result.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_friend_search_param.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_value_callback.dart';
-import 'package:tencent_im_sdk_plugin_platform_interface/im_flutter_plugin_platform_interface.dart';
-import 'package:uuid/uuid.dart';
+import 'package:tencent_cloud_chat_sdk/enum/V2TimFriendshipListener.dart';
+import 'package:tencent_cloud_chat_sdk/enum/friend_application_type_enum.dart';
+import 'package:tencent_cloud_chat_sdk/enum/friend_response_type_enum.dart';
+import 'package:tencent_cloud_chat_sdk/enum/friend_type_enum.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_follow_type_check_result.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_user_info_result.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_callback.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_follow_info.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_follow_operation_result.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_friend_application_result.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_friend_check_result.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_friend_group.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_friend_info.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_friend_info_result.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_friend_operation_result.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_friend_search_param.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_official_account_info_result.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_value_callback.dart';
+import 'package:tencent_cloud_chat_sdk/tencent_cloud_chat_sdk_platform_interface.dart';
 
 ///关系链接口，包含了好友的添加和删除，黑名单的添加和删除等逻辑
 ///
@@ -67,32 +69,34 @@ import 'package:uuid/uuid.dart';
 ///{@category Manager}
 ///
 class V2TIMFriendshipManager {
-  ///@nodoc
-  late MethodChannel _channel;
-
-  ///@nodoc
-  Map<String, V2TimFriendshipListener> friendListenerList = {};
-
-  ///@nodoc
-  V2TIMFriendshipManager(channel) {
-    _channel = channel;
-  }
-
   ///设置关系链监听器
   ///
   Future<void> setFriendListener({
     required V2TimFriendshipListener listener,
   }) {
-    final String listenerUuid = Uuid().v4();
-    this.friendListenerList[listenerUuid] = listener;
-    return ImFlutterPlatform.instance
-        .setFriendListener(listener: listener, listenerUuid: listenerUuid);
+    return TencentCloudChatSdkPlatform.instance
+        .setFriendListener(listener: listener);
+  }
+
+  Future<void> removeFriendListener({
+    V2TimFriendshipListener? listener,
+  }) {
+    return TencentCloudChatSdkPlatform.instance.removeFriendListener(
+      listener: listener,
+    );
+  }
+
+  Future<void> addFriendListener({
+    required V2TimFriendshipListener listener,
+  }) {
+    return TencentCloudChatSdkPlatform.instance
+        .addFriendListener(listener: listener);
   }
 
   ///获取好友列表
   ///
   Future<V2TimValueCallback<List<V2TimFriendInfo>>> getFriendList() async {
-    return ImFlutterPlatform.instance.getFriendList();
+    return TencentCloudChatSdkPlatform.instance.getFriendList();
   }
 
   /// 获取指定好友资料
@@ -107,7 +111,8 @@ class V2TIMFriendshipManager {
   Future<V2TimValueCallback<List<V2TimFriendInfoResult>>> getFriendsInfo({
     required List<String> userIDList,
   }) async {
-    return ImFlutterPlatform.instance.getFriendsInfo(userIDList: userIDList);
+    return TencentCloudChatSdkPlatform.instance
+        .getFriendsInfo(userIDList: userIDList);
   }
 
   /// 设置指定好友资料
@@ -117,7 +122,7 @@ class V2TIMFriendshipManager {
     String? friendRemark,
     Map<String, String>? friendCustomInfo,
   }) async {
-    return ImFlutterPlatform.instance.setFriendInfo(
+    return TencentCloudChatSdkPlatform.instance.setFriendInfo(
         userID: userID,
         friendRemark: friendRemark,
         friendCustomInfo: friendCustomInfo);
@@ -133,13 +138,14 @@ class V2TIMFriendshipManager {
     String? addSource,
     required FriendTypeEnum addType,
   }) async {
-    return ImFlutterPlatform.instance.addFriend(
-        userID: userID,
-        remark: remark,
-        friendGroup: friendGroup,
-        addWording: addWording,
-        addSource: addSource,
-        addType: EnumUtils.convertFriendTypeEnum(addType) as int);
+    return TencentCloudChatSdkPlatform.instance.addFriend(
+      userID: userID,
+      remark: remark,
+      friendGroup: friendGroup,
+      addWording: addWording,
+      addSource: addSource,
+      addType: addType.index,
+    );
   }
 
   ///   删除好友
@@ -153,8 +159,8 @@ class V2TIMFriendshipManager {
   /// ```
   ///
   /// ```
-  /// V2TIMFriendInfo.V2TIM_FRIEND_TYPE_SINGLE：单向好友
-  /// V2TIMFriendInfo.V2TIM_FRIEND_TYPE_BOTH：双向好友
+  /// FriendType.V2TIM_FRIEND_TYPE_SINGLE：单向好友
+  /// FriendType.V2TIM_FRIEND_TYPE_BOTH：双向好友
   /// ```
   ///
   Future<V2TimValueCallback<List<V2TimFriendOperationResult>>>
@@ -162,9 +168,10 @@ class V2TIMFriendshipManager {
     required List<String> userIDList,
     required FriendTypeEnum deleteType,
   }) async {
-    return ImFlutterPlatform.instance.deleteFromFriendList(
-        userIDList: userIDList,
-        deleteType: EnumUtils.convertFriendTypeEnum(deleteType));
+    return TencentCloudChatSdkPlatform.instance.deleteFromFriendList(
+      userIDList: userIDList,
+      deleteType: deleteType.index,
+    );
   }
 
   /// 检查指定用户的好友关系
@@ -176,24 +183,25 @@ class V2TIMFriendshipManager {
   /// ```
   ///
   /// ```
-  /// V2TIMFriendInfo.V2TIM_FRIEND_TYPE_SINGLE：单向好友
-  /// V2TIMFriendInfo.V2TIM_FRIEND_TYPE_BOTH：双向好友
+  /// FriendType.V2TIM_FRIEND_TYPE_SINGLE：单向好友
+  /// FriendType.V2TIM_FRIEND_TYPE_BOTH：双向好友
   /// ```
   ///
   Future<V2TimValueCallback<List<V2TimFriendCheckResult>>> checkFriend({
     required List<String> userIDList,
     required FriendTypeEnum checkType,
   }) async {
-    return ImFlutterPlatform.instance.checkFriend(
-        userIDList: userIDList,
-        checkType: EnumUtils.convertFriendTypeEnum(checkType));
+    return TencentCloudChatSdkPlatform.instance.checkFriend(
+      userIDList: userIDList,
+      checkType: checkType.index,
+    );
   }
 
   ///获取好友申请列表
   ///
   Future<V2TimValueCallback<V2TimFriendApplicationResult>>
       getFriendApplicationList() async {
-    return ImFlutterPlatform.instance.getFriendApplicationList();
+    return TencentCloudChatSdkPlatform.instance.getFriendApplicationList();
   }
 
   /// 同意好友申请
@@ -206,8 +214,8 @@ class V2TIMFriendshipManager {
   /// ```
   ///
   /// ```
-  /// V2TIMFriendApplication.V2TIM_FRIEND_ACCEPT_AGREE：同意添加单向好友
-  /// V2TIMFriendApplication.V2TIM_FRIEND_ACCEPT_AGREE_AND_ADD：同意并添加为双向好友
+  /// FriendApplicationType.V2TIM_FRIEND_ACCEPT_AGREE：同意添加单向好友
+  /// FriendApplicationType.V2TIM_FRIEND_ACCEPT_AGREE_AND_ADD：同意并添加为双向好友
   /// ```
   ///
   Future<V2TimValueCallback<V2TimFriendOperationResult>>
@@ -216,11 +224,8 @@ class V2TIMFriendshipManager {
     required FriendApplicationTypeEnum type,
     required String userID,
   }) async {
-    return ImFlutterPlatform.instance.acceptFriendApplication(
-        responseType:
-            EnumUtils.convertFriendResponseTypeEnum(responseType) as int,
-        type: EnumUtils.convertFriendApplicationTypeEnum(type) as int,
-        userID: userID);
+    return TencentCloudChatSdkPlatform.instance.acceptFriendApplication(
+        responseType: responseType.index, type: type.index, userID: userID);
   }
 
   /// 拒绝好友申请
@@ -236,9 +241,8 @@ class V2TIMFriendshipManager {
     required FriendApplicationTypeEnum type,
     required String userID,
   }) async {
-    return ImFlutterPlatform.instance.refuseFriendApplication(
-        type: EnumUtils.convertFriendApplicationTypeEnum(type) as int,
-        userID: userID);
+    return TencentCloudChatSdkPlatform.instance
+        .refuseFriendApplication(type: type.index, userID: userID);
   }
 
   /// 删除好友申请
@@ -253,15 +257,14 @@ class V2TIMFriendshipManager {
     required FriendApplicationTypeEnum type,
     required String userID,
   }) async {
-    return ImFlutterPlatform.instance.deleteFriendApplication(
-        type: EnumUtils.convertFriendApplicationTypeEnum(type) as int,
-        userID: userID);
+    return TencentCloudChatSdkPlatform.instance
+        .deleteFriendApplication(type: type.index, userID: userID);
   }
 
   ///设置好友申请已读
   ///
   Future<V2TimCallback> setFriendApplicationRead() async {
-    return ImFlutterPlatform.instance.setFriendApplicationRead();
+    return TencentCloudChatSdkPlatform.instance.setFriendApplicationRead();
   }
 
   ///添加用户到黑名单
@@ -269,7 +272,8 @@ class V2TIMFriendshipManager {
   Future<V2TimValueCallback<List<V2TimFriendOperationResult>>> addToBlackList({
     required List<String> userIDList,
   }) async {
-    return ImFlutterPlatform.instance.addToBlackList(userIDList: userIDList);
+    return TencentCloudChatSdkPlatform.instance
+        .addToBlackList(userIDList: userIDList);
   }
 
   ///把用户从黑名单中删除
@@ -278,14 +282,14 @@ class V2TIMFriendshipManager {
       deleteFromBlackList({
     required List<String> userIDList,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .deleteFromBlackList(userIDList: userIDList);
   }
 
   ///获取黑名单列表
   ///
   Future<V2TimValueCallback<List<V2TimFriendInfo>>> getBlackList() async {
-    return ImFlutterPlatform.instance.getBlackList();
+    return TencentCloudChatSdkPlatform.instance.getBlackList();
   }
 
   ///新建好友分组
@@ -302,7 +306,7 @@ class V2TIMFriendshipManager {
     required String groupName,
     List<String>? userIDList,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .createFriendGroup(groupName: groupName, userIDList: userIDList);
   }
 
@@ -317,7 +321,7 @@ class V2TIMFriendshipManager {
   Future<V2TimValueCallback<List<V2TimFriendGroup>>> getFriendGroups({
     List<String>? groupNameList,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .getFriendGroups(groupNameList: groupNameList);
   }
 
@@ -326,7 +330,7 @@ class V2TIMFriendshipManager {
   Future<V2TimCallback> deleteFriendGroup({
     required List<String> groupNameList,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .deleteFriendGroup(groupNameList: groupNameList);
   }
 
@@ -344,7 +348,7 @@ class V2TIMFriendshipManager {
     required String oldName,
     required String newName,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .renameFriendGroup(oldName: oldName, newName: newName);
   }
 
@@ -355,7 +359,7 @@ class V2TIMFriendshipManager {
     required String groupName,
     required List<String> userIDList,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .addFriendsToFriendGroup(groupName: groupName, userIDList: userIDList);
   }
 
@@ -366,7 +370,7 @@ class V2TIMFriendshipManager {
     required String groupName,
     required List<String> userIDList,
   }) async {
-    return ImFlutterPlatform.instance.deleteFriendsFromFriendGroup(
+    return TencentCloudChatSdkPlatform.instance.deleteFriendsFromFriendGroup(
         groupName: groupName, userIDList: userIDList);
   }
 
@@ -377,7 +381,99 @@ class V2TIMFriendshipManager {
   Future<V2TimValueCallback<List<V2TimFriendInfoResult>>> searchFriends({
     required V2TimFriendSearchParam searchParam,
   }) async {
-    return ImFlutterPlatform.instance.searchFriends(searchParam: searchParam);
+    return TencentCloudChatSdkPlatform.instance
+        .searchFriends(searchParam: searchParam);
+  }
+
+  /// 订阅公众号
+  ///
+  Future<V2TimCallback> subscribeOfficialAccount({
+    required String officialAccountID,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .subscribeOfficialAccount(officialAccountID: officialAccountID);
+  }
+
+  /// 取消订阅公众号
+  ///
+  Future<V2TimCallback> unsubscribeOfficialAccount({
+    required String officialAccountID,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .unsubscribeOfficialAccount(officialAccountID: officialAccountID);
+  }
+
+  /// 获取公众号列表
+  ///
+  Future<V2TimValueCallback<List<V2TimOfficialAccountInfoResult>>>
+      getOfficialAccountsInfo({
+    required List<String> officialAccountIDList,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .getOfficialAccountsInfo(officialAccountIDList: officialAccountIDList);
+  }
+
+  /// 关注用户
+  ///
+  Future<V2TimValueCallback<List<V2TimFollowOperationResult>>> followUser({
+    required List<String> userIDList,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .followUser(userIDList: userIDList);
+  }
+
+  /// 取消关注用户
+  ///
+  Future<V2TimValueCallback<List<V2TimFollowOperationResult>>> unfollowUser({
+    required List<String> userIDList,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .unfollowUser(userIDList: userIDList);
+  }
+
+  /// 获取我的关注列表
+  ///
+  Future<V2TimValueCallback<V2TimUserInfoResult>> getMyFollowingList({
+    required String nextCursor,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .getMyFollowingList(nextCursor: nextCursor);
+  }
+
+  /// 获取关注我的列表
+  ///
+  Future<V2TimValueCallback<V2TimUserInfoResult>> getMyFollowersList({
+    required String nextCursor,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .getMyFollowersList(nextCursor: nextCursor);
+  }
+
+  /// 获取我的互关列表
+  ///
+  Future<V2TimValueCallback<V2TimUserInfoResult>> getMutualFollowersList({
+    required String nextCursor,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .getMutualFollowersList(nextCursor: nextCursor);
+  }
+
+  /// 获取指定用户的 关注/粉丝/互关 数量信息
+  ///
+  Future<V2TimValueCallback<List<V2TimFollowInfo>>> getUserFollowInfo({
+    required List<String> userIDList,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .getUserFollowInfo(userIDList: userIDList);
+  }
+
+  /// 检查指定用户的关注类型
+  ///
+  Future<V2TimValueCallback<List<V2TimFollowTypeCheckResult>>> checkFollowType({
+    required List<String> userIDList,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .checkFollowType(userIDList: userIDList);
   }
 
   ///@nodoc

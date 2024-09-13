@@ -1,12 +1,11 @@
-import 'dart:convert';
+// ignore_for_file: unused_field
 
-import 'package:flutter/services.dart';
-import 'package:tencent_im_sdk_plugin/enum/V2TimSignalingListener.dart';
-import 'package:tencent_im_sdk_plugin/enum/offlinePushInfo.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_callback.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_signaling_info.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_value_callback.dart';
-import 'package:uuid/uuid.dart';
+import 'package:tencent_cloud_chat_sdk/enum/V2TimSignalingListener.dart';
+import 'package:tencent_cloud_chat_sdk/enum/offlinePushInfo.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_callback.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_signaling_info.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_value_callback.dart';
+import 'package:tencent_cloud_chat_sdk/tencent_cloud_chat_sdk_platform_interface.dart';
 
 /// 提供了信令操作相关接口
 ///
@@ -27,26 +26,14 @@ import 'package:uuid/uuid.dart';
 /// {@category Manager}
 ///
 class V2TIMSignalingManager {
-  ///@nodoc
-  late MethodChannel _channel;
-
-  ///@nodoc
-  V2TIMSignalingManager(channel) {
-    _channel = channel;
-  }
-
-  ///@nodoc
-  Map<String, V2TimSignalingListener> signalingListenerList = {};
-
   ///添加信令监听
   ///
   Future<void> addSignalingListener({
     required V2TimSignalingListener listener,
   }) {
-    final String listenerUuid = Uuid().v4();
-    this.signalingListenerList[listenerUuid] = listener;
-    return _channel.invokeMethod(
-        "addSignalingListener", buildParam({"listenerUuid": listenerUuid}));
+    return TencentCloudChatSdkPlatform.instance.addSignalingListener(
+      listener: listener,
+    );
   }
 
   ///移除信令监听
@@ -54,17 +41,8 @@ class V2TIMSignalingManager {
   Future<void> removeSignalingListener({
     V2TimSignalingListener? listener,
   }) {
-    var listenerUuid = "";
-    if (listener != null) {
-      listenerUuid = this.signalingListenerList.keys.firstWhere(
-          (k) => this.signalingListenerList[k] == listener,
-          orElse: () => "");
-      this.signalingListenerList.remove(listenerUuid);
-    } else {
-      this.signalingListenerList.clear();
-    }
-    return _channel.invokeMethod(
-        "removeSignalingListener", buildParam({"listenerUuid": listenerUuid}));
+    return TencentCloudChatSdkPlatform.instance
+        .removeSignalingListener(listener: listener);
   }
 
   Future<V2TimValueCallback<String>> invite({
@@ -74,22 +52,12 @@ class V2TIMSignalingManager {
     bool onlineUserOnly = false,
     OfflinePushInfo? offlinePushInfo,
   }) async {
-    return V2TimValueCallback<String>.fromJson(
-      formatJson(
-        await _channel.invokeMethod(
-          "invite",
-          buildParam(
-            {
-              "invitee": invitee,
-              "data": data,
-              "timeout": timeout,
-              "onlineUserOnly": onlineUserOnly,
-              "offlinePushInfo": offlinePushInfo?.toJson()
-            },
-          ),
-        ),
-      ),
-    );
+    return TencentCloudChatSdkPlatform.instance.invite(
+        invitee: invitee,
+        data: data,
+        timeout: timeout,
+        onlineUserOnly: onlineUserOnly,
+        offlinePushInfo: offlinePushInfo);
   }
 
   Future<V2TimValueCallback<String>> inviteInGroup({
@@ -99,40 +67,21 @@ class V2TIMSignalingManager {
     int timeout = 30,
     bool onlineUserOnly = false,
   }) async {
-    return V2TimValueCallback<String>.fromJson(
-      formatJson(
-        await _channel.invokeMethod(
-          "inviteInGroup",
-          buildParam(
-            {
-              "groupID": groupID,
-              "inviteeList": inviteeList,
-              "data": data,
-              "timeout": timeout,
-              "onlineUserOnly": onlineUserOnly,
-            },
-          ),
-        ),
-      ),
-    );
+    return TencentCloudChatSdkPlatform.instance.inviteInGroup(
+        groupID: groupID,
+        inviteeList: inviteeList,
+        data: data,
+        timeout: timeout,
+        onlineUserOnly: onlineUserOnly);
   }
 
   Future<V2TimCallback> cancel({
     required String inviteID,
     String? data,
   }) async {
-    return V2TimCallback.fromJson(
-      formatJson(
-        await _channel.invokeMethod(
-          "cancel",
-          buildParam(
-            {
-              "inviteID": inviteID,
-              "data": data,
-            },
-          ),
-        ),
-      ),
+    return TencentCloudChatSdkPlatform.instance.cancel(
+      inviteID: inviteID,
+      data: data,
     );
   }
 
@@ -140,18 +89,9 @@ class V2TIMSignalingManager {
     required String inviteID,
     String? data,
   }) async {
-    return V2TimCallback.fromJson(
-      formatJson(
-        await _channel.invokeMethod(
-          "accept",
-          buildParam(
-            {
-              "inviteID": inviteID,
-              "data": data,
-            },
-          ),
-        ),
-      ),
+    return TencentCloudChatSdkPlatform.instance.accept(
+      inviteID: inviteID,
+      data: data,
     );
   }
 
@@ -159,18 +99,9 @@ class V2TIMSignalingManager {
     required String inviteID,
     String? data,
   }) async {
-    return V2TimCallback.fromJson(
-      formatJson(
-        await _channel.invokeMethod(
-          "reject",
-          buildParam(
-            {
-              "inviteID": inviteID,
-              "data": data,
-            },
-          ),
-        ),
-      ),
+    return TencentCloudChatSdkPlatform.instance.reject(
+      inviteID: inviteID,
+      data: data,
     );
   }
 
@@ -180,51 +111,23 @@ class V2TIMSignalingManager {
   ///
   /// 参数
   /// msg	消息对象
+  ///
   /// 返回
   /// V2TIMSignalingInfo 信令信息，如果为 null，则 msg 不是一条信令消息。
   ///
   Future<V2TimValueCallback<V2TimSignalingInfo>> getSignalingInfo({
     required String msgID,
   }) async {
-    return V2TimValueCallback<V2TimSignalingInfo>.fromJson(
-      formatJson(
-        await _channel.invokeMethod(
-          "getSignalingInfo",
-          buildParam(
-            {
-              "msgID": msgID,
-            },
-          ),
-        ),
-      ),
+    return TencentCloudChatSdkPlatform.instance.getSignalingInfo(
+      msgID: msgID,
     );
   }
 
   Future<V2TimCallback> addInvitedSignaling({
     required V2TimSignalingInfo info,
   }) async {
-    return V2TimCallback.fromJson(
-      formatJson(
-        await _channel.invokeMethod(
-          "addInvitedSignaling",
-          buildParam(
-            {
-              "info": info.toJson(),
-            },
-          ),
-        ),
-      ),
+    return TencentCloudChatSdkPlatform.instance.addInvitedSignaling(
+      info: info,
     );
-  }
-
-  ///@nodoc
-  Map buildParam(Map param) {
-    param["TIMManagerName"] = "signalingManager";
-    return param;
-  }
-
-  ///@nodoc
-  formatJson(jsonSrc) {
-    return json.decode(json.encode(jsonSrc));
   }
 }

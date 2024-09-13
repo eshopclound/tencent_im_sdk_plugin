@@ -1,4 +1,4 @@
-import  ImSDK_Plus
+import ImSDK_Plus
 
 /// 自定义用户实体
 class V2UserInfoEntity: V2TIMUserFullInfo {

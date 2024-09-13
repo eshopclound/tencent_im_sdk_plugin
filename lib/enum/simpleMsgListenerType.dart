@@ -1,1 +1,8 @@
-export 'package:tencent_im_sdk_plugin_platform_interface/enum/simpleMsgListenerType.dart';
+// ignore_for_file: file_names
+
+enum SimpleMsgListenerType {
+  onRecvC2CTextMessage,
+  onRecvC2CCustomMessage,
+  onRecvGroupTextMessage,
+  onRecvGroupCustomMessage
+}

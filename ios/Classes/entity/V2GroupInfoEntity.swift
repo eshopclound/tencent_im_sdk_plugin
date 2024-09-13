@@ -36,6 +36,12 @@ class V2GroupInfoEntity: V2TIMGroupInfo {
 		if let addOpt = dict["addOpt"] as? Int {
 			self.groupAddOpt = V2TIMGroupAddOpt.init(rawValue: addOpt)!;
 		}
+        if let approveOpt = dict["approveOpt"] as? Int {
+            self.groupApproveOpt = V2TIMGroupAddOpt.init(rawValue: approveOpt)!;
+        }
+        if let isSupportTopic = dict["isSupportTopic"] as? Bool {
+            self.isSupportTopic = isSupportTopic;
+        }
 		if let dictCustomInfo = dict["customInfo"] as? Dictionary<String, String> {
 			var customInfoData: [String: Data] = [:]
 			for (key, value) in dictCustomInfo {
@@ -43,10 +49,18 @@ class V2GroupInfoEntity: V2TIMGroupInfo {
 			}
 			self.customInfo = customInfoData
 		}
+        if let defaultPermissions = dict["defaultPermissions"] as? UInt64 {
+            self.defaultPermissions = defaultPermissions;
+        }
+        if let isEnablePermissionGroup = dict["isEnablePermissionGroup"] as? Bool {
+            self.enablePermissionGroup = isEnablePermissionGroup;
+        }
+
     }
 
     /// 根据对象获得字典对象
     public static func getDict(info: V2TIMGroupInfo) -> [String: Any] {
+        
         var result: [String: Any] = [:];
         result["groupID"] = info.groupID;
         result["groupType"] = info.groupType ?? "Public";
@@ -65,7 +79,11 @@ class V2GroupInfoEntity: V2TIMGroupInfo {
         result["role"] = info.role;
         result["recvOpt"] = info.recvOpt.rawValue;
         result["joinTime"] = info.joinTime;
-		
+        result["isSupportTopic"] = info.isSupportTopic;
+        result["approveOpt"] = info.groupApproveOpt.rawValue;
+        result["isEnablePermissionGroup"] = info.enablePermissionGroup;
+        result["memberMaxCount"] = info.memberMaxCount;
+        result["defaultPermissions"] = info.defaultPermissions;
 		if info.customInfo != nil {
 			var retCustomInfo: Dictionary<String, String> = [:]
 			for i in info.customInfo {

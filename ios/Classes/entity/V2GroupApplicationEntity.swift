@@ -1,5 +1,5 @@
 import Foundation
-import  ImSDK_Plus
+import ImSDK_Plus
 
 /// 自定义群申请实体
 class V2GroupApplicationEntity: V2TIMGroupApplication {
@@ -15,7 +15,7 @@ class V2GroupApplicationEntity: V2TIMGroupApplication {
         result["addTime"] = info.addTime;
         result["requestMsg"] = info.requestMsg;
         result["handledMsg"] = info.handledMsg;
-        result["type"] = info.getType.rawValue;
+        result["type"] = info.applicationType.rawValue;
         result["handleStatus"] = info.handleStatus.rawValue;
         result["handleResult"] = info.handleResult.rawValue;
         return result;

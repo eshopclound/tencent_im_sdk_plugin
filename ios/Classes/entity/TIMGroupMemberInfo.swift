@@ -1,5 +1,5 @@
 import Foundation
-import  ImSDK_Plus
+import ImSDK_Plus
 
 /// 自定义群成员信息实体
 class TIMGroupMemberInfo: V2TIMGroupMemberInfo {

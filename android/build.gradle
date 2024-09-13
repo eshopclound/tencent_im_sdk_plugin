@@ -1,48 +1,70 @@
-group 'com.qq.qcloud.tencent_im_sdk_plugin'
+group 'com.tencent.chat.tencent_cloud_chat_sdk'
 version '1.0'
+
 buildscript {
     repositories {
         google()
-        jcenter()
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'com.android.tools.build:gradle:7.3.0'
     }
 }
 
 rootProject.allprojects {
     repositories {
         google()
-        jcenter()
         mavenCentral()
     }
 }
+
 apply plugin: 'com.android.library'
 
 android {
+    if (project.android.hasProperty("namespace")) {
+        namespace 'com.tencent.chat.tencent_cloud_chat_sdk'
+    }
+
     compileSdkVersion 28
+
+    
+
+    
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     defaultConfig {
-        minSdkVersion 16
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        // library 混淆 -> 随 library 引用，自动添加到 apk 打包混淆
+        minSdkVersion 19
         consumerProguardFiles 'consumer-proguard-rules.txt'
         multiDexEnabled true
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters 'x86', 'x86_64', 'armeabi-v7a','arm64-v8a'
         }
+    }
+
+    dependencies {
+        api 'com.tencent.imsdk:imsdk-plus:8.1.6122'
+        testImplementation 'junit:junit:4.13.2'
+        testImplementation 'org.mockito:mockito-core:5.0.0'
     }
     lintOptions {
         disable 'InvalidPackage'
     }
 
-    dependencies {
-       api 'com.tencent.imsdk:imsdk-plus:5.8.1668'
-        //    implementation fileTree(dir: 'libs', include: ['*.aar'])
-
+    testOptions {
+        unitTests.all {
+            testLogging {
+               events "passed", "skipped", "failed", "standardOut", "standardError"
+               outputs.upToDateWhen {false}
+               showStandardStreams = true
+            }
+        }
     }
-
     packagingOptions{
         pickFirst '**/libc++_shared.so'
         doNotStrip "*/armeabi/libYTCommon.so"
@@ -50,5 +72,4 @@ android {
         doNotStrip "*/x86/libYTCommon.so"
         doNotStrip "*/arm64-v8a/libYTCommon.so"
     }
-    
 }

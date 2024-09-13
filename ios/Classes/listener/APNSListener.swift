@@ -2,17 +2,19 @@
 //  APNSListener.swift
 //  tencent_im_sdk_plugin
 //
-//  Created by 林智 on 2020/12/18.
+//  Created by xingchenhe on 2020/12/18.
 //
 
 import Foundation
 import ImSDK_Plus
-
+import Flutter
 class APNSListener: NSObject, V2TIMAPNSListener {
 	public static var count: UInt32 = 0;
 	
 	public func onSetAPPUnreadCount() -> UInt32 {
-		return APNSListener.count;
+        print("im sdk set unreadcount :")
+        print(SDKManager.uc)
+        return SDKManager.uc
 	}
 	
 }

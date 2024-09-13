@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 enum ReceiveMsgOptEnum {
   //在线正常接收消息，离线时会进行离线推送
   V2TIM_RECEIVE_MESSAGE,

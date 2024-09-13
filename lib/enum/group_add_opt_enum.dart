@@ -2,6 +2,8 @@
 ///
 /// {@category Enums}
 ///
+// ignore_for_file: constant_identifier_names
+
 enum GroupAddOptTypeEnum {
   ///禁止加群
   ///

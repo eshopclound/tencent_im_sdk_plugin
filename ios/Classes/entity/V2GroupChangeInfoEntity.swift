@@ -1,5 +1,5 @@
 import Foundation
-import  ImSDK_Plus
+import ImSDK_Plus
 
 /// 自定义群改变信息
 class V2GroupChangeInfoEntity: V2TIMGroupChangeInfo {
@@ -10,6 +10,8 @@ class V2GroupChangeInfoEntity: V2TIMGroupChangeInfo {
         result["type"] = info.type.rawValue;
         result["key"] = info.key;
         result["value"] = info.value;
+        result["boolValue"] = info.boolValue
+        result["intValue"] = info.intValue
         return result;
     }
 }

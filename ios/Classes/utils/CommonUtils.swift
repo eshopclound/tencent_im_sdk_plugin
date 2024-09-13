@@ -19,7 +19,31 @@ public class CommonUtils {
         }
         return value
     }
-
+    public static func dicValueString(_ dic:[String : Any]) -> String?{
+            let data = try? JSONSerialization.data(withJSONObject: dic, options: [])
+            let str = String(data: data!, encoding: String.Encoding.utf8)
+            return str
+        }
+    public static func writeLog(_ content:[String:Any],_ isRes:Bool){
+          
+            //  let dict = NSMutableDictionary()
+            //  dict["logLevel"] = NSNumber(value: V2TIMLogLevel.LOG_INFO.rawValue)
+            //  dict["fileName"] = (isRes == true ? "tencent_im_flutter_sdk_res":"tencent_im_flutter_sdk")
+            //  dict["logContent"] = dicValueString(content)
+            //  do {
+            //      if let dataParam = try? JSONSerialization.data(withJSONObject: dict, options: .prettyPrinted) {
+            //          if let strParam = String(data: dataParam, encoding: .utf8) as NSString? {
+                        
+            //              DispatchQueue.global().async {
+            //                  V2TIMManager.sharedInstance().callExperimentalAPI("writeLog", param: strParam) { result in
+            //                  } fail: { code, desc in
+            //                      print("write log error: "+(desc!))
+            //                  }
+            //              }
+            //          }
+            //      }
+            //  }
+    }
     /// 将hex string 转为Data
     public static func dataWithHexString(hex: String) -> Data {
         var hex = hex
@@ -40,9 +64,7 @@ public class CommonUtils {
     // 存在则赋值
     public static func getRequestInstance(call: FlutterMethodCall, instance: NSObject) -> NSObject {
       for item in call.arguments as! [String: Any] {
-        if item.value != nil {
           instance.setValue(item.value, forKey: item.key)
-        }
       }
       return instance
     }
@@ -61,37 +83,83 @@ public class CommonUtils {
             return V2TIM_IMAGE_TYPE_THUMB_ANDROID
         }
     }
-
+    public static func changeToIos(type:Int)->Int{
+        let V2TIM_IMAGE_TYPE_ORIGIN_ANDROID = 0;
+        let V2TIM_IMAGE_TYPE_THUMB_ANDROID = 1;
+        let V2TIM_IMAGE_TYPE_LARGE_ANDROID = 2;
+        if(type == V2TIM_IMAGE_TYPE_ORIGIN_ANDROID){
+            
+            return V2TIMImageType.IMAGE_TYPE_ORIGIN.rawValue
+        }
+        if(type == V2TIM_IMAGE_TYPE_THUMB_ANDROID){
+            return V2TIMImageType.IMAGE_TYPE_THUMB.rawValue
+        }
+        if(type == V2TIM_IMAGE_TYPE_LARGE_ANDROID){
+            return V2TIMImageType.IMAGE_TYPE_LARGE.rawValue
+        }
+        return 0;
+    }
     // 返回失败结果
 	public static func resultFailed(desc: String? = "failed", code: Int32? = 0, call: FlutterMethodCall, result: @escaping FlutterResult) {
-		let res = ["code": code, "desc": desc] as [String : Any]
-
-		TencentImSDKPlugin.channel?.invokeMethod("logFromSwift", arguments: ["msg": "Swift Error，方法名\(call.method)，错误信息：", "data": desc])
-		result(res)
+        
+        DispatchQueue.main.async {
+            let res = ["code": code ?? -1, "desc": desc ?? ""] as [String : Any]
+            for channel in TencentCloudChatSdkPlugin.channels {
+                logFromSwift(channel: channel,data: [
+                    "msg": "Swift Response，方法名\(call.method)，数据：", "data": desc ?? ""
+                ])
+            }
+            
+            result(res)
+        }
     }
 	
 	// 返回失败结果带data
 	public static func resultFailed(desc: String? = "failed", code: Int32? = -1, data: Dictionary<String, Any>, call: FlutterMethodCall, result: @escaping FlutterResult) {
-		let res = ["code": code, "desc": desc, "data": data] as [String : Any]
-	  
-		TencentImSDKPlugin.channel?.invokeMethod("logFromSwift", arguments: ["msg": "Swift Error，方法名\(call.method)，错误信息：", "data": res])
-		result(res)
+        
+        DispatchQueue.main.async {
+            let res = ["code": code ?? -1, "desc": desc ?? "", "data": data] as [String : Any]
+            for channel in TencentCloudChatSdkPlugin.channels {
+                logFromSwift(channel: channel,data: [
+                        "msg": "Swift Response，方法名\(call.method)，数据：", "data": res
+                ])
+            }
+           
+            result(res)
+        }
 	}
 
     // 返回成功结果
 	public static func resultSuccess(desc: String = "ok", call: FlutterMethodCall, result: @escaping FlutterResult, data: Any = NSNull()) {
-		let res = ["code": 0, "desc": desc, "data": data] as [String : Any]
-		
-		TencentImSDKPlugin.channel?.invokeMethod(
-			"logFromSwift",
-			arguments: [
-				"msg": "Swift Response，方法名\(call.method)，数据：", "data": res
-		])
-        result(res)
+        DispatchQueue.main.async {
+            let res = ["code": 0, "desc": desc, "data": data] as [String : Any]
+            for channel in TencentCloudChatSdkPlugin.channels {
+                logFromSwift(channel: channel,data: [
+                        "msg": "Swift Response，方法名\(call.method)，数据：", "data": res
+                ])
+            }
+            
+            result(res)
+        }
+    }
+    
+    
+    public static func parseMessageListDict( list:[V2TIMMessage]) -> [Any]{
+        var messageList: [[String: Any]] = [];
+        for i in list {
+            
+            messageList.append(V2MessageEntity.init(message: i).getDict());
+        }
+        
+        return messageList;
     }
 
-    public static func logFromSwift(channel: FlutterMethodChannel, data: Any) {
-      channel.invokeMethod("logFromSwift", arguments: data);
+    public static func logFromSwift(channel: FlutterMethodChannel, data: [String:Any]) {
+//        DispatchQueue.main.async {
+//            channel.invokeMethod("logFromSwift", arguments: data);
+//        }
+        
+        CommonUtils.writeLog(data, false)
     }
 	
 	public static func getV2TIMOfflinePushInfo(call: FlutterMethodCall, result: @escaping FlutterResult) -> V2TIMOfflinePushInfo {
@@ -100,11 +168,24 @@ public class CommonUtils {
 		if let offlinePushInfo = CommonUtils.getParam(call: call, result: result, param: "offlinePushInfo") as? [String: Any] {
 			v2TIMOfflinePushInfo.title = offlinePushInfo["title"] as? String
 			v2TIMOfflinePushInfo.desc = offlinePushInfo["desc"] as? String
-			v2TIMOfflinePushInfo.disablePush = offlinePushInfo["disablePush"] as? Bool ?? true
+			v2TIMOfflinePushInfo.disablePush = offlinePushInfo["disablePush"] as? Bool ?? false
 			v2TIMOfflinePushInfo.ext = offlinePushInfo["ext"] as? String
 			v2TIMOfflinePushInfo.iOSSound = offlinePushInfo["iOSSound"] as? String
-			v2TIMOfflinePushInfo.ignoreIOSBadge = offlinePushInfo["ignoreIOSBadge"] as? Bool ?? true
+			v2TIMOfflinePushInfo.ignoreIOSBadge = offlinePushInfo["ignoreIOSBadge"] as? Bool ?? false
 			v2TIMOfflinePushInfo.androidOPPOChannelID = offlinePushInfo["androidOPPOChannelID"] as? String
+            v2TIMOfflinePushInfo.androidSound = offlinePushInfo["androidSound"] as? String
+            v2TIMOfflinePushInfo.androidVIVOClassification = offlinePushInfo["androidVIVOClassification"] as? Int ?? 1
+            v2TIMOfflinePushInfo.androidFCMChannelID = offlinePushInfo["androidFCMChannelID"] as? String
+            v2TIMOfflinePushInfo.androidXiaoMiChannelID = offlinePushInfo["androidXiaoMiChannelID"] as? String ?? ""
+            v2TIMOfflinePushInfo.iOSPushType = V2TIMIOSOfflinePushType.init(rawValue: offlinePushInfo["iOSPushType"] as? Int ?? 0) ?? V2TIMIOSOfflinePushType.TIM_IOS_OFFLINE_PUSH_TYPE_APNS
+            
+            v2TIMOfflinePushInfo.androidHuaWeiCategory = offlinePushInfo["androidHuaWeiCategory"] as? String
+            v2TIMOfflinePushInfo.androidVIVOCategory = offlinePushInfo["androidVIVOCategory"] as? String;
+
+            v2TIMOfflinePushInfo.androidHuaWeiImage = offlinePushInfo["androidHuaWeiImage"] as? String;
+            v2TIMOfflinePushInfo.androidHonorImage = offlinePushInfo["androidHonorImage"] as? String;
+            v2TIMOfflinePushInfo.androidFCMImage = offlinePushInfo["androidFCMImage"] as? String;
+            v2TIMOfflinePushInfo.iOSImage = offlinePushInfo["iOSImage"] as? String;
 		}
 		
 		return v2TIMOfflinePushInfo;

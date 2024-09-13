@@ -2,11 +2,12 @@
 //  GroupManager.swift
 //  tencent_im_sdk_plugin
 //
-//  Created by 林智 on 2020/12/24.
+//  Created by xingchenhe on 2020/12/24.
 //
-
+import Hydra
 import Foundation
 import ImSDK_Plus
+import Flutter
 
 class GroupManager {
 	var channel: FlutterMethodChannel
@@ -24,7 +25,12 @@ class GroupManager {
 		let faceURL = CommonUtils.getParam(call: call, result: result, param: "faceUrl") as? String;
 		let addOpt = CommonUtils.getParam(call: call, result: result, param: "addOpt") as? Int;
 		let memberListMap = CommonUtils.getParam(call: call, result: result, param: "memberList") as? [[String: Any]];
-		
+        let isAllMuted = CommonUtils.getParam(call: call, result: result, param: "isAllMuted") as? Bool;
+        let isSupportTopic = CommonUtils.getParam(call: call, result: result, param: "isSupportTopic") as? Bool;
+        let approveOpt = CommonUtils.getParam(call: call, result: result, param: "approveOpt") as? Int;
+        let isEnablePermissionGroup = CommonUtils.getParam(call: call, result: result, param: "isEnablePermissionGroup") as? Bool;
+        let defaultPermissions = CommonUtils.getParam(call: call, result: result, param: "defaultPermissions") as? UInt64;
+       
 		let info = V2TIMGroupInfo();
 		info.groupID = groupID;
 		info.groupType = groupType as String?;
@@ -33,17 +39,21 @@ class GroupManager {
 		info.introduction = introduction;
 		info.faceURL = faceURL;
 		info.groupAddOpt = V2TIMGroupAddOpt(rawValue: addOpt ?? 2)!;
-		
+        info.allMuted = isAllMuted ?? false;
+        info.groupApproveOpt = V2TIMGroupAddOpt(rawValue: approveOpt ?? 2)!
+        info.isSupportTopic = isSupportTopic ?? false
+        info.enablePermissionGroup = isEnablePermissionGroup ?? false;
+        info.defaultPermissions = defaultPermissions ?? 0;
+        
 		var memberList: [V2TIMCreateGroupMemberInfo] = []
 		if memberListMap != nil {
 			for i in memberListMap! {
 				let item = V2TIMCreateGroupMemberInfo()
-				item.userID = i["userID"] as! String;
-				item.role = 200;
+                item.userID = i["userID"] as? String;
+                item.role = i["role"] as? UInt32 ?? 200;
 				memberList.append(item);
 			}
 		}
-		
 		V2TIMManager.sharedInstance()?.createGroup(info, memberList: memberList, succ: {
 			(id) -> Void in
 			
@@ -87,7 +97,7 @@ class GroupManager {
 			(array) -> Void in
 			
 			var res: [[String: Any]] = []
-			for info in array! {
+			for info in array ?? [] {
 				res.append(V2GroupInfoEntity.getDict(info: info))
 			}
 			CommonUtils.resultSuccess(call: call, result: result, data: res);
@@ -101,8 +111,8 @@ class GroupManager {
 			(array) -> Void in
 			
 			var groupList: [[String: Any]] = []
-			for item in array! {
-				let i = ["resultCode": item.resultCode, "resultMessage": item.resultMsg, "groupInfo": V2GroupInfoEntity.getDict(info: item.info)] as [String : Any]
+			for item in array ?? [] {
+                let i = ["resultCode": item.resultCode, "resultMessage": item.resultMsg!, "groupInfo": V2GroupInfoEntity.getDict(info: item.info)] as [String : Any]
 				groupList.append(i)
 			}
 			
@@ -114,13 +124,166 @@ class GroupManager {
     public func setGroupInfo(call: FlutterMethodCall, result: @escaping FlutterResult) {
 		if let dict = call.arguments as? Dictionary<String, Any> {
 			let info = V2GroupInfoEntity.init(dict: dict)
+            
 			V2TIMManager.sharedInstance().setGroupInfo(info, succ: {
 
 				CommonUtils.resultSuccess(call: call, result: result)
 			}, fail: TencentImUtils.returnErrorClosures(call: call, result: result))
         }
     }
+    public func getJoinedCommunityList(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        V2TIMManager.sharedInstance().getJoinedCommunityList { infos in
+            var dataList: [[String: Any]]  = [];
+            infos?.forEach({ info_item in
+                dataList.append(V2GroupInfoEntity.getDict(info: info_item))
+            })
+            CommonUtils.resultSuccess(call: call, result: result, data:dataList);
+        } fail: { code, desc in
+            CommonUtils.resultFailed(desc: desc, code: code, call: call, result: result)
+        }
+    }
+    
+    public func createTopicInCommunity(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let groupID = CommonUtils.getParam(call: call, result: result, param: "groupID") as? String;
+        let topicInfo = CommonUtils.getParam(call: call, result: result, param: "topicInfo") as? [String:Any] ;
+        
+        let info = V2TIMTopicInfoEntity.init(dict: topicInfo!);
+        
+        V2TIMManager.sharedInstance().createTopic(inCommunity: groupID, topicInfo: info) { groupid in
+            CommonUtils.resultSuccess(call: call, result: result, data:groupid as Any);
+        } fail: { code, desc in
+            CommonUtils.resultFailed(desc: desc, code: code, call: call, result: result)
+        }
 
+    }
+    public func deleteTopicFromCommunity(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let groupID = CommonUtils.getParam(call: call, result: result, param: "groupID") as? String;
+        let topicIDList = CommonUtils.getParam(call: call, result: result, param: "topicIDList") as? Array<String>;
+        V2TIMManager.sharedInstance().deleteTopic(fromCommunity: groupID, topicIDList: topicIDList) { _array in
+            var list: [[String: Any]]  = [];
+            _array?.forEach({ item in
+                let i = item as? V2TIMTopicOperationResult
+                var _item:[String:Any] = [:];
+                _item["errorCode"] = i?.errorCode as Any?
+                _item["errorMsg"] = i?.errorMsg as Any?
+                _item["topicID"] = i?.topicID as Any?
+                list.append(_item)
+            })
+            CommonUtils.resultSuccess(call: call, result: result, data:list);
+        } fail: { code, desc in
+            CommonUtils.resultFailed(desc: desc, code: code, call: call,result: result)
+        }
+    }
+    public func setTopicInfo(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let groupID = CommonUtils.getParam(call: call, result: result, param: "groupID") as? String ;
+        let topicInfo = CommonUtils.getParam(call: call, result: result, param: "topicInfo") as? [String:Any] ?? [:];
+        if((topicInfo["topicID"]) != nil){
+            var IDList :[String] = [];
+            IDList.append(topicInfo["topicID"] as! String)
+            V2TIMManager.sharedInstance().getTopicInfoList(groupID, topicIDList: IDList) { res_list in
+                if(res_list?.count == 1){
+                    let info_native = res_list?[0] as? V2TIMTopicInfoResult;
+                    
+                    if(info_native?.errorCode == 0){
+                        let tinfo = info_native?.topicInfo;
+                        print(topicInfo)
+                        if(topicInfo["topicName"] as? String != nil){
+                            tinfo?.topicName = topicInfo["topicName"] as? String
+                        }
+                        if(topicInfo["topicFaceUrl"] as? String != nil){
+                            
+                            let obj = V2TIMTopicInfo()
+                            let mirror = Mirror(reflecting: obj)
+                            var hasfaceURLField = false
+                            var hasTopicFaceURLField = false
+                            for child in mirror.children {
+                                if child.label == "faceURL" {
+                                    hasfaceURLField = true
+                                    #if hasfaceURLField
+                                    tinfo?.faceURL = topicInfo["topicFaceUrl"] as? String
+                                    #endif
+                                    break
+                                }
+                                if child.label == "topicFaceURL" {
+                                    hasTopicFaceURLField = true
+                                    #if hasTopicFaceURLField
+                                    tinfo?.topicFaceURL = topicInfo["topicFaceUrl"] as? String
+                                    #endif
+                                    break
+                                }
+                            }
+                            
+                            if(hasfaceURLField){
+                            }else if(hasTopicFaceURLField){
+                            }
+                            
+                        }
+                        if(topicInfo["notification"] as? String != nil){
+                            tinfo?.notification = topicInfo["notification"] as? String
+                        }
+                        if(topicInfo["isAllMute"] as? Bool != nil){
+                            tinfo?.isAllMuted = topicInfo["isAllMute"] as! Bool
+                        }
+                        if(topicInfo["customString"] as? String != nil){
+                            tinfo?.customString = topicInfo["customString"] as? String
+                        }
+                        if(topicInfo["draftText"] as? String != nil){
+                            tinfo?.draftText = topicInfo["draftText"] as? String
+                        }
+                        if(topicInfo["introduction"] as? String != nil){
+                            tinfo?.introduction = topicInfo["introduction"] as? String
+                        }
+                        if(topicInfo["defaultPermissions"] as? UInt64 != nil){
+                            tinfo?.defaultPermissions = topicInfo["defaultPermissions"] as? UInt64 ?? 0
+                        }
+                        V2TIMManager.sharedInstance().setTopicInfo(tinfo) {
+                            CommonUtils.resultSuccess(call: call, result: result);
+                        } fail: { code, desc in
+                            CommonUtils.resultFailed(desc: desc, code: code, call: call,result: result)
+                        }
+                    }else{
+                        CommonUtils.resultFailed(desc: info_native?.errorMsg, code: info_native?.errorCode, call: call,result: result)
+                    }
+                }else {
+                    CommonUtils.resultFailed(desc: "topic not found", code: -1, call: call, result: result)
+                }
+            } fail: { code, desc in
+                CommonUtils.resultFailed(desc: desc, code: code, call: call,result: result)
+            }
+
+            
+        }
+        
+        
+        
+    }
+    
+    public func getTopicInfoList(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let groupID = CommonUtils.getParam(call: call, result: result, param: "groupID") as? String;
+        let topicIDList = CommonUtils.getParam(call: call, result: result, param: "topicIDList") as? Array<String>;
+        
+        V2TIMManager.sharedInstance().getTopicInfoList(groupID, topicIDList: topicIDList) { _array in
+            
+            var list: [[String: Any]]  = [];
+        
+            _array?.forEach({ item in
+                let i = item as? V2TIMTopicInfoResult
+                
+                var _item:[String:Any] = [:];
+                _item["errorCode"] = i!.errorCode as Int32?
+                _item["errorMsg"] = i!.errorMsg as String? ?? ""
+                do {
+                    _item["topicInfo"] =  V2TIMTopicInfoEntity.getDict(info: i!.topicInfo)
+                } 
+                list.append(_item)
+            })
+            CommonUtils.resultSuccess(call: call, result: result, data:list);
+            
+        } fail: { code, desc in
+            CommonUtils.resultFailed(desc: desc, code: code, call: call,result: result)
+        }
+
+    }
 	
 	// 0接收且推送，1不接收，2在线接收离线不推送
 	func setReceiveMessageOpt(call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -153,7 +316,7 @@ class GroupManager {
 			
 			var res: [[String: Any]] = []
 			
-			for item in memberList! {
+			for item in memberList ?? [] {
 				res.append(V2GroupMemberFullInfoEntity.getDict(info: item))
 			}
 			
@@ -170,7 +333,7 @@ class GroupManager {
 			
 			var res: [[String: Any]] = []
 			
-			for item in array! {
+			for item in array ?? [] {
 				res.append(V2GroupMemberFullInfoEntity.getDict(info: item));
 			}
 			
@@ -197,7 +360,7 @@ class GroupManager {
 			(array) -> Void in
 			
 			var info: V2TIMGroupMemberFullInfo;
-			for item in array! {
+			for item in array ?? [] {
 				if item.userID == userID {
 					info = item
 					info.nameCard = nameCard
@@ -246,13 +409,14 @@ class GroupManager {
 		let groupID = CommonUtils.getParam(call: call, result: result, param: "groupID") as? String;
 		let memberList = CommonUtils.getParam(call: call, result: result, param: "memberList") as? Array<String>;
 		let reason = CommonUtils.getParam(call: call, result: result, param: "reason") as? String;
-		
-		V2TIMManager.sharedInstance()?.kickGroupMember(groupID, memberList: memberList, reason: reason, succ: {
+        let duration = (CommonUtils.getParam(call: call, result: result, param: "duration") as? UInt32);
+        
+		V2TIMManager.sharedInstance()?.kickGroupMember(groupID, memberList: memberList, reason: reason, duration: duration ?? 0,succ: {
 			(array) -> Void in
 			
 			var res: [GroupMemberOperationResultEntity] = []
 			
-			for item in array! {
+			for item in array ?? [] {
 				res.append(GroupMemberOperationResultEntity(result: item))
 			}
 			
@@ -301,7 +465,7 @@ class GroupManager {
 		V2TIMManager.sharedInstance()?.getGroupApplicationList({
 			(array) -> Void in
 			
-			for item in array!.applicationList {
+			for item in array?.applicationList ?? [] {
 				let app = item as! V2TIMGroupApplication;
 				if app.fromUser == fromUser && app.groupID == groupID {
 					application = app
@@ -325,7 +489,7 @@ class GroupManager {
 		V2TIMManager.sharedInstance()?.getGroupApplicationList({
 			(array) -> Void in
 			
-			for item in array!.applicationList {
+			for item in array?.applicationList ?? [] {
 				let app = item as! V2TIMGroupApplication;
 				if app.fromUser == fromUser && app.groupID == groupID {
 					application = app
@@ -427,27 +591,34 @@ class GroupManager {
         let searchParam = CommonUtils.getParam(call: call, result: result, param: "param") as! [String: Any];
         let groupMemberSearchParam = V2TIMGroupMemberSearchParam();
         
-        if(searchParam["keywordList"] != nil){
+        if(searchParam["keywordList"] as? [String] != nil){
+            
             groupMemberSearchParam.keywordList = searchParam["keywordList"] as? [String];
         }
-        if(searchParam["groupIDList"] != nil){
+        if(searchParam["groupIDList"] as? [String] != nil){
+            
             groupMemberSearchParam.groupIDList = searchParam["groupIDList"] as? [String];
             if groupMemberSearchParam.groupIDList.isEmpty {
                 groupMemberSearchParam.groupIDList = nil;
             }
         }
-        if(searchParam["isSearchMemberUserID"] != nil){
+        if(searchParam["isSearchMemberUserID"] as? Bool ?? false){
+            
             groupMemberSearchParam.isSearchMemberUserID = searchParam["isSearchMemberUserID"] as! Bool;
         }
-        if(searchParam["isSearchGroupName"] != nil){
-            groupMemberSearchParam.isSearchMemberNickName = searchParam["isSearchGroupName"] as! Bool;
+        if(searchParam["isSearchMemberNickName"] as? Bool ?? false){
+            
+            groupMemberSearchParam.isSearchMemberNickName = searchParam["isSearchMemberNickName"] as! Bool;
         }
-        if(searchParam["isSearchMemberRemark"] != nil){
+        if(searchParam["isSearchMemberRemark"] as? Bool ?? false){
+            
             groupMemberSearchParam.isSearchMemberRemark = searchParam["isSearchMemberRemark"] as! Bool;
         }
-        if(searchParam["isSearchMemberNameCard"] != nil){
+        if(searchParam["isSearchMemberNameCard"] as? Bool ?? false){
+            
             groupMemberSearchParam.isSearchMemberNameCard = searchParam["isSearchMemberNameCard"] as! Bool;
         }
+        print(groupMemberSearchParam)
             V2TIMManager.sharedInstance().searchGroupMembers(groupMemberSearchParam, succ: {
                 (array) -> Void in
                 
@@ -465,5 +636,57 @@ class GroupManager {
                 CommonUtils.resultSuccess(call: call, result: result, data: resMap)
             }, fail: TencentImUtils.returnErrorClosures(call: call, result: result))
 	}
+    func setGroupCounters(call: FlutterMethodCall, result: @escaping FlutterResult){
+        let counters = CommonUtils.getParam(call: call, result: result, param: "counters") as! [String: NSNumber];
+        let groupID = CommonUtils.getParam(call: call, result: result, param: "groupID") as? String ;
+        V2TIMManager.sharedInstance().setGroupCounters(groupID, counters: counters) { data in
+            CommonUtils.resultSuccess(call: call, result: result, data: data as Any)
+        } fail: { code, desc in
+            CommonUtils.resultFailed(desc: desc, code: code, call: call, result: result)
+        }
+
+    }
+    func getGroupCounters(call: FlutterMethodCall, result: @escaping FlutterResult){
+        let keys = CommonUtils.getParam(call: call, result: result, param: "keys") as! [String];
+        let groupID = CommonUtils.getParam(call: call, result: result, param: "groupID") as? String ;
+        V2TIMManager.sharedInstance().getGroupCounters(groupID, keys: keys) { data in
+            CommonUtils.resultSuccess(call: call, result: result, data: data as Any)
+        } fail: { code, desc in
+            CommonUtils.resultFailed(desc: desc, code: code, call: call, result: result)
+        }
+    }
+    func increaseGroupCounter(call: FlutterMethodCall, result: @escaping FlutterResult){
+        let groupID = CommonUtils.getParam(call: call, result: result, param: "groupID") as? String ;
+        let key = CommonUtils.getParam(call: call, result: result, param: "key") as? String ;
+        let value = CommonUtils.getParam(call: call, result: result, param: "value") as? Int ;
+        V2TIMManager.sharedInstance().increaseGroupCounter(groupID, key: key, value: value!) { data in
+            CommonUtils.resultSuccess(call: call, result: result, data: data as Any)
+        } fail: { code, desc in
+            CommonUtils.resultFailed(desc: desc, code: code, call: call, result: result)
+        }
+
+    }
+    func decreaseGroupCounter(call: FlutterMethodCall, result: @escaping FlutterResult){
+        let groupID = CommonUtils.getParam(call: call, result: result, param: "groupID") as? String ;
+        let key = CommonUtils.getParam(call: call, result: result, param: "key") as? String ;
+        let value = CommonUtils.getParam(call: call, result: result, param: "value") as? Int ;
+        V2TIMManager.sharedInstance().decreaseGroupCounter(groupID, key: key, value: value!) { data in
+            CommonUtils.resultSuccess(call: call, result: result, data: data as Any)
+        } fail: { code, desc in
+            CommonUtils.resultFailed(desc: desc, code: code, call: call, result: result)
+        }
+    }
+    func markGroupMemberList(call: FlutterMethodCall, result: @escaping FlutterResult){
+        let groupID = CommonUtils.getParam(call: call, result: result, param: "groupID") as? String ;
+        let memberIDList = CommonUtils.getParam(call: call, result: result, param: "memberIDList") as?  [String] ;
+        let markType = (CommonUtils.getParam(call: call, result: result, param: "markType") as? UInt32)! ;
+        let enableMark = (CommonUtils.getParam(call: call, result: result, param: "enableMark") as? Bool)! ;
+        V2TIMManager.sharedInstance().markGroupMemberList(groupID, memberList: memberIDList, markType: markType, enableMark: enableMark) {
+            CommonUtils.resultSuccess(call: call, result: result)
+        } fail: { code, desc in
+            CommonUtils.resultFailed(desc: desc, code: code, call: call, result: result)
+        }
+
+    }
  }
 

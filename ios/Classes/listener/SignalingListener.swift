@@ -2,11 +2,11 @@
 //  SignalingListener.swift
 //  tencent_im_sdk_plugin
 //
-//  Created by 林智 on 2020/12/24.
+//  Created by xingchenhe on 2020/12/24.
 //
 import Foundation
 import ImSDK_Plus
-
+import Flutter
 class SignalingListener: NSObject, V2TIMSignalingListener {
 	/*
 	 * SignalingActionType_Invite           = 1,  // 邀请方发起邀请
@@ -20,7 +20,7 @@ class SignalingListener: NSObject, V2TIMSignalingListener {
         listenerUuid = listenerUid;
     }
 	public func onReceiveNewInvitation(_ inviteID: String!, inviter: String!, groupID: String!, inviteeList: [String]!, data: String?) {
-		TencentImSDKPlugin.invokeListener(type: ListenerType.onReceiveNewInvitation, method: "signalingListener", data: [
+		TencentCloudChatSdkPlugin.invokeListener(type: ListenerType.onReceiveNewInvitation, method: "signalingListener", data: [
 			"inviteID": inviteID!,
 			"data": data ?? "",
 			"groupID": groupID as Any,
@@ -30,7 +30,7 @@ class SignalingListener: NSObject, V2TIMSignalingListener {
 	}
 	/// 被邀请者接受邀请
 	public func onInviteeAccepted(_ inviteID: String!, invitee: String!, data: String?) {
-        TencentImSDKPlugin.invokeListener(type: ListenerType.onInviteeAccepted, method: "signalingListener", data: [
+        TencentCloudChatSdkPlugin.invokeListener(type: ListenerType.onInviteeAccepted, method: "signalingListener", data: [
             "inviteID": inviteID!,
             "invitee": invitee!,
             "data": data ?? ""
@@ -39,7 +39,7 @@ class SignalingListener: NSObject, V2TIMSignalingListener {
 
     /// 被邀请者拒绝邀请
 	public func onInviteeRejected(_ inviteID: String!, invitee: String!, data: String?) {
-        TencentImSDKPlugin.invokeListener(type: ListenerType.onInviteeRejected, method: "signalingListener", data: [
+        TencentCloudChatSdkPlugin.invokeListener(type: ListenerType.onInviteeRejected, method: "signalingListener", data: [
             "inviteID": inviteID!,
             "invitee": invitee!,
             "data": data ?? ""
@@ -48,7 +48,7 @@ class SignalingListener: NSObject, V2TIMSignalingListener {
 
     /// 邀请被取消
 	public func onInvitationCancelled(_ inviteID: String!, inviter: String!, data: String?) {
-        TencentImSDKPlugin.invokeListener(type: ListenerType.onInvitationCancelled, method: "signalingListener", data: [
+        TencentCloudChatSdkPlugin.invokeListener(type: ListenerType.onInvitationCancelled, method: "signalingListener", data: [
             "inviteID": inviteID!,
             "inviter": inviter!,
             "data": data ?? ""
@@ -57,7 +57,7 @@ class SignalingListener: NSObject, V2TIMSignalingListener {
 
     /// 邀请超时
     public func onInvitationTimeout(_ inviteID: String!, inviteeList: [String]!) {
-        TencentImSDKPlugin.invokeListener(type: ListenerType.onInvitationTimeout, method: "signalingListener", data: [
+        TencentCloudChatSdkPlugin.invokeListener(type: ListenerType.onInvitationTimeout, method: "signalingListener", data: [
             "inviteID": inviteID!,
             "inviteeList": inviteeList!
         ], listenerUuid: listenerUuid)

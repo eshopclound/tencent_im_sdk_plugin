@@ -1,1 +1,23 @@
-export 'package:tencent_im_sdk_plugin_platform_interface/enum/history_message_get_type.dart';
+/// 获取历史消息类型
+///
+/// {@category Enums}
+///
+// ignore_for_file: constant_identifier_names
+
+class HistoryMessageGetType {
+  ///获取云端更老的消息
+  ///
+  static const V2TIM_GET_CLOUD_OLDER_MSG = 1;
+
+  ///获取云端更新的消息
+  ///
+  static const V2TIM_GET_CLOUD_NEWER_MSG = 2;
+
+  ///获取本地更老的消息
+  ///
+  static const V2TIM_GET_LOCAL_OLDER_MSG = 3;
+
+  ///获取本地更新的消息
+  ///
+  static const V2TIM_GET_LOCAL_NEWER_MSG = 4;
+}

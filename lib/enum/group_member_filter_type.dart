@@ -1,1 +1,23 @@
-export 'package:tencent_im_sdk_plugin_platform_interface/enum/group_member_filter_type.dart';
+/// 群成员过滤类型
+///
+/// {@category Enums}
+///
+// ignore_for_file: constant_identifier_names
+
+class GroupMemberFilterType {
+  ///全部成员
+  ///
+  static const int V2TIM_GROUP_MEMBER_FILTER_ALL = 0x00;
+
+  ///群主
+  ///
+  static const int V2TIM_GROUP_MEMBER_FILTER_OWNER = 0x01;
+
+  ///管理员
+  ///
+  static const int V2TIM_GROUP_MEMBER_FILTER_ADMIN = 0x02;
+
+  ///普通成员
+  ///
+  static const int V2TIM_GROUP_MEMBER_FILTER_COMMON = 0x04;
+}

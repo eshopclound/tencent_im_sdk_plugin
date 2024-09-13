@@ -1,40 +1,31 @@
+// ignore_for_file: unused_element, deprecated_member_use_from_same_package, unused_field
+
 import 'dart:convert';
 
-import 'package:tencent_im_sdk_plugin/enum/V2TimAdvancedMsgListener.dart';
-import 'package:tencent_im_sdk_plugin/enum/V2TimConversationListener.dart';
-import 'package:tencent_im_sdk_plugin/enum/V2TimFriendshipListener.dart';
-import 'package:tencent_im_sdk_plugin/enum/V2TimGroupListener.dart';
-import 'package:tencent_im_sdk_plugin/enum/V2TimSDKListener.dart';
-import 'package:tencent_im_sdk_plugin/enum/V2TimSignalingListener.dart';
-import 'package:tencent_im_sdk_plugin/enum/V2TimSimpleMsgListener.dart';
-import 'package:tencent_im_sdk_plugin/enum/listener_type.dart';
-import 'package:tencent_im_sdk_plugin/enum/log_level_enum.dart';
-import 'package:tencent_im_sdk_plugin/enum/message_priority_enum.dart';
-import 'package:tencent_im_sdk_plugin/enum/utils.dart';
-import 'package:tencent_im_sdk_plugin/manager/v2_tim_conversation_manager.dart';
-import 'package:tencent_im_sdk_plugin/manager/v2_tim_friendship_manager.dart';
-import 'package:tencent_im_sdk_plugin/manager/v2_tim_group_manager.dart';
-import 'package:tencent_im_sdk_plugin/manager/v2_tim_message_manager.dart';
-import 'package:tencent_im_sdk_plugin/manager/v2_tim_offline_push_manager.dart';
-import 'package:tencent_im_sdk_plugin/manager/v2_tim_signaling_manager.dart';
-import 'package:flutter/services.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_group_change_info.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_group_member_change_info.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_group_member_info.dart';
-
-import 'package:tencent_im_sdk_plugin/models/v2_tim_callback.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_conversation.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_friend_application.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_friend_info.dart';
-
-import 'package:tencent_im_sdk_plugin/models/v2_tim_message.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_message_receipt.dart';
-
-import 'package:tencent_im_sdk_plugin/models/v2_tim_user_info.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_value_callback.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_user_full_info.dart';
-import 'package:tencent_im_sdk_plugin_platform_interface/im_flutter_plugin_platform_interface.dart';
-import 'package:uuid/uuid.dart';
+import 'package:flutter/foundation.dart';
+import 'package:tencent_cloud_chat_sdk/enum/V2TimCommunityListener.dart';
+import 'package:tencent_cloud_chat_sdk/enum/V2TimGroupListener.dart';
+import 'package:tencent_cloud_chat_sdk/enum/V2TimSDKListener.dart';
+import 'package:tencent_cloud_chat_sdk/enum/V2TimSimpleMsgListener.dart';
+import 'package:tencent_cloud_chat_sdk/enum/V2TimUIKitListener.dart';
+import 'package:tencent_cloud_chat_sdk/enum/callbacks.dart';
+import 'package:tencent_cloud_chat_sdk/enum/log_level_enum.dart';
+import 'package:tencent_cloud_chat_sdk/enum/message_priority_enum.dart';
+import 'package:tencent_cloud_chat_sdk/manager/v2_tim_community_manager.dart';
+import 'package:tencent_cloud_chat_sdk/manager/v2_tim_conversation_manager.dart';
+import 'package:tencent_cloud_chat_sdk/manager/v2_tim_friendship_manager.dart';
+import 'package:tencent_cloud_chat_sdk/manager/v2_tim_group_manager.dart';
+import 'package:tencent_cloud_chat_sdk/manager/v2_tim_message_manager.dart';
+import 'package:tencent_cloud_chat_sdk/manager/v2_tim_offline_push_manager.dart';
+import 'package:tencent_cloud_chat_sdk/manager/v2_tim_signaling_manager.dart';
+import 'package:tencent_cloud_chat_sdk/enum/v2_tim_plugins.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_callback.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_message.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_user_status.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_value_callback.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_user_full_info.dart';
+import 'package:tencent_cloud_chat_sdk/tencent_cloud_chat_sdk_platform_interface.dart';
+import 'package:tencent_cloud_chat_sdk/utils/const.dart';
 
 /// IM SDK 主核心类，负责 IM SDK 的初始化、登录、消息收发，建群退群等功能。
 ///
@@ -73,525 +64,100 @@ import 'package:uuid/uuid.dart';
 ///{@category Manager}
 ///
 class V2TIMManager {
-  ///@nodoc
-  late MethodChannel _channel;
+  static Map<String, String> currentLoginInfo = {};
+  static bool addNativeCallback = false;
+  V2TIMMessageManager v2TIMMessageManager = V2TIMMessageManager();
+  V2TIMConversationManager v2ConversationManager = V2TIMConversationManager();
+  V2TIMGroupManager v2TIMGroupManager = V2TIMGroupManager();
+  V2TIMOfflinePushManager v2TIMOfflinePushManager = V2TIMOfflinePushManager();
+  V2TIMFriendshipManager v2TIMFriendshipManager = V2TIMFriendshipManager();
+  V2TIMSignalingManager v2timSignalingManager = V2TIMSignalingManager();
 
-  ///@nodoc
-  late V2TIMConversationManager v2ConversationManager;
-
-  ///@nodoc
-  late V2TIMMessageManager v2TIMMessageManager;
-
-  ///@nodoc
-  late V2TIMFriendshipManager v2TIMFriendshipManager;
-
-  ///@nodoc
-  late V2TIMGroupManager v2TIMGroupManager;
-
-  ///@nodoc
-  late V2TIMOfflinePushManager v2TIMOfflinePushManager;
-
-  ///@nodoc
-  late V2TIMSignalingManager v2timSignalingManager;
-
-  late Map<String, V2TimSimpleMsgListener> simpleMessageListenerList = {};
-
-  late Map<String, V2TimSDKListener> initSDKListenerList = {};
-
-  late Map<String, V2TimGroupListener> groupListenerList = {};
-
-  ///@nodoc
-  V2TIMManager(MethodChannel channel) {
-    this._channel = channel;
-    this.v2ConversationManager = new V2TIMConversationManager(channel);
-    this.v2TIMMessageManager = new V2TIMMessageManager(channel);
-    this.v2TIMFriendshipManager = new V2TIMFriendshipManager(channel);
-    this.v2TIMGroupManager = new V2TIMGroupManager(channel);
-    this.v2TIMOfflinePushManager = new V2TIMOfflinePushManager(channel);
-    this.v2timSignalingManager = new V2TIMSignalingManager(channel);
-    this.addNativeCallback(channel);
+  V2TIMManager() {
+    if (!addNativeCallback) {
+      TencentCloudChatSdkPlatform.instance.addNativeCallback();
+      addNativeCallback = true;
+    }
   }
-
-  ///@nodoc
-  void addNativeCallback(MethodChannel _channel) {
-    _channel.setMethodCallHandler((call) {
-      try {
-        if (call.method == ListenerType.simpleMsgListener) {
-          Map<String, dynamic> data = this.formatJson(call.arguments);
-          String listenerUuid = data['listenerUuid'];
-          V2TimSimpleMsgListener? simpleMsgListener =
-              this.simpleMessageListenerList[listenerUuid];
-          Map<String, dynamic> params =
-              data['data'] == null ? new Map<String, dynamic>() : data['data'];
-          String type = data['type'];
-          if (simpleMsgListener != null) {
-            switch (type) {
-              case 'onRecvC2CCustomMessage':
-                // String msgID, V2TIMUserInfo sender, byte[] customData
-                simpleMsgListener.onRecvC2CCustomMessage(
-                  params['msgID'],
-                  V2TimUserInfo.fromJson(params['sender']),
-                  params['customData'],
-                );
-                break;
-              case 'onRecvC2CTextMessage':
-                // String msgID, V2TIMUserInfo sender, String text
-                simpleMsgListener.onRecvC2CTextMessage(
-                  params['msgID'],
-                  V2TimUserInfo.fromJson(params['sender']),
-                  params['text'],
-                );
-                break;
-              case 'onRecvGroupCustomMessage':
-                // String msgID, String groupID, V2TIMGroupMemberInfo sender, byte[] customData
-                simpleMsgListener.onRecvGroupCustomMessage(
-                  params['msgID'],
-                  params['groupID'],
-                  V2TimGroupMemberInfo.fromJson(params['sender']),
-                  params['customData'],
-                );
-                break;
-              case 'onRecvGroupTextMessage':
-                // String msgID, String groupID, V2TIMGroupMemberInfo sender, String text
-                simpleMsgListener.onRecvGroupTextMessage(
-                  params['msgID'],
-                  params['groupID'],
-                  V2TimGroupMemberInfo.fromJson(params['sender']),
-                  params['text'],
-                );
-                break;
-            }
-          }
-        } else if (call.method == ListenerType.initSDKListener) {
-          Map<String, dynamic> data = this.formatJson(call.arguments);
-          String listenerUuid = data['listenerUuid'];
-          V2TimSDKListener? initSDKListener =
-              this.initSDKListenerList[listenerUuid];
-          Map<String, dynamic> params =
-              data['data'] == null ? new Map<String, dynamic>() : data['data'];
-          String type = data['type'];
-          if (initSDKListener != null) {
-            switch (type) {
-              case 'onSelfInfoUpdated':
-                initSDKListener.onSelfInfoUpdated(
-                  V2TimUserFullInfo.fromJson(params),
-                );
-                break;
-              case 'onConnectFailed':
-                initSDKListener.onConnectFailed(
-                  params['code'],
-                  params['desc'],
-                );
-                break;
-              case 'onConnecting':
-                initSDKListener.onConnecting();
-                break;
-              case 'onConnectSuccess':
-                initSDKListener.onConnectSuccess();
-                break;
-              case 'onKickedOffline':
-                initSDKListener.onKickedOffline();
-                break;
-              case 'onUserSigExpired':
-                initSDKListener.onUserSigExpired();
-                break;
-            }
-          }
-        } else if (call.method == ListenerType.groupListener) {
-          Map<String, dynamic> data = this.formatJson(call.arguments);
-          String listenerUuid = data['listenerUuid'];
-          V2TimGroupListener? groupListener =
-              this.groupListenerList[listenerUuid];
-          String type = data['type'];
-          Map<String, dynamic> params = data['data'] == null
-              ? new Map<String, dynamic>()
-              : new Map<String, dynamic>.from(data['data']);
-
-          String groupID = params['groupID'] == null ? '' : params['groupID'];
-          String opReason =
-              params['opReason'] == null ? '' : params['opReason'];
-          bool isAgreeJoin =
-              params['isAgreeJoin'] == null ? false : params['isAgreeJoin'];
-          String customData =
-              params['customData'] == null ? '' : params['customData'];
-
-          Map<String, String> groupAttributeMap =
-              params['groupAttributeMap'] == null
-                  ? new Map<String, String>()
-                  : new Map<String, String>.from(params['groupAttributeMap']);
-
-          List<Map<String, dynamic>> memberListMap =
-              params['memberList'] == null
-                  ? List.empty(growable: true)
-                  : List.from(params['memberList']);
-
-          List<Map<String, dynamic>> groupMemberChangeInfoListMap =
-              params['groupMemberChangeInfoList'] == null
-                  ? List.empty(growable: true)
-                  : List.from(params['groupMemberChangeInfoList']);
-
-          List<Map<String, dynamic>> groupChangeInfoListMap =
-              params['groupChangeInfoList'] == null
-                  ? List.empty(growable: true)
-                  : List.from(params['groupChangeInfoList']);
-          List<V2TimGroupChangeInfo> groupChangeInfoList =
-              List.empty(growable: true);
-          List<V2TimGroupMemberChangeInfo> groupMemberChangeInfoList =
-              List.empty(growable: true);
-          List<V2TimGroupMemberInfo> memberList = List.empty(growable: true);
-
-          if (memberListMap.isNotEmpty) {
-            memberListMap.forEach((element) {
-              memberList.add(V2TimGroupMemberInfo.fromJson(element));
-            });
-          }
-          if (groupMemberChangeInfoListMap.isNotEmpty) {
-            groupMemberChangeInfoListMap.forEach((element) {
-              groupMemberChangeInfoList
-                  .add(V2TimGroupMemberChangeInfo.fromJson(element));
-            });
-          }
-          if (groupChangeInfoListMap.isNotEmpty) {
-            groupChangeInfoListMap.forEach((element) {
-              groupChangeInfoList.add(V2TimGroupChangeInfo.fromJson(element));
-            });
-          }
-          late V2TimGroupMemberInfo opUser;
-          late V2TimGroupMemberInfo member;
-          if (params['opUser'] != null) {
-            opUser = V2TimGroupMemberInfo.fromJson(params['opUser']);
-          }
-          if (params['member'] != null) {
-            member = V2TimGroupMemberInfo.fromJson(params['member']);
-          }
-          if (groupListener != null) {
-            switch (type) {
-              case 'onMemberEnter':
-                groupListener.onMemberEnter(
-                  groupID,
-                  memberList,
-                );
-                break;
-              case 'onMemberLeave':
-                groupListener.onMemberLeave(
-                  groupID,
-                  member,
-                );
-                break;
-              case 'onMemberInvited':
-                groupListener.onMemberInvited(
-                  groupID,
-                  opUser,
-                  memberList,
-                );
-                break;
-              case 'onMemberKicked':
-                groupListener.onMemberKicked(
-                  groupID,
-                  opUser,
-                  memberList,
-                );
-                break;
-              case 'onMemberInfoChanged':
-                groupListener.onMemberInfoChanged(
-                  groupID,
-                  groupMemberChangeInfoList,
-                );
-                break;
-              case 'onGroupCreated':
-                groupListener.onGroupCreated(groupID);
-                break;
-              case 'onGroupDismissed':
-                groupListener.onGroupDismissed(
-                  groupID,
-                  opUser,
-                );
-                break;
-              case 'onGroupRecycled':
-                groupListener.onGroupRecycled(
-                  groupID,
-                  opUser,
-                );
-                break;
-              case 'onGroupInfoChanged':
-                groupListener.onGroupInfoChanged(
-                  groupID,
-                  groupChangeInfoList,
-                );
-                break;
-              case 'onReceiveJoinApplication':
-                groupListener.onReceiveJoinApplication(
-                  groupID,
-                  member,
-                  opReason,
-                );
-                break;
-              case 'onApplicationProcessed':
-                groupListener.onApplicationProcessed(
-                  groupID,
-                  opUser,
-                  isAgreeJoin,
-                  opReason,
-                );
-                break;
-              case 'onGrantAdministrator':
-                groupListener.onGrantAdministrator(
-                  groupID,
-                  opUser,
-                  memberList,
-                );
-                break;
-              case 'onRevokeAdministrator':
-                groupListener.onRevokeAdministrator(
-                  groupID,
-                  opUser,
-                  memberList,
-                );
-                break;
-              case 'onQuitFromGroup':
-                groupListener.onQuitFromGroup(groupID);
-                break;
-              case 'onReceiveRESTCustomData':
-                groupListener.onReceiveRESTCustomData(
-                  groupID,
-                  customData,
-                );
-                break;
-              case 'onGroupAttributeChanged':
-                groupListener.onGroupAttributeChanged(
-                  groupID,
-                  groupAttributeMap,
-                );
-                break;
-            }
-          }
-        } else if (call.method == ListenerType.advancedMsgListener) {
-          Map<String, dynamic> data = this.formatJson(call.arguments);
-          String listenerUuid = data['listenerUuid'];
-          V2TimAdvancedMsgListener? listener =
-              this.v2TIMMessageManager.advancedMsgListenerList[listenerUuid];
-          String type = data['type'];
-          dynamic params =
-              data['data'] == null ? new Map<String, dynamic>() : data['data'];
-          if (listener != null) {
-            switch (type) {
-              case 'onRecvNewMessage':
-                listener.onRecvNewMessage(V2TimMessage.fromJson(params));
-                break;
-              case 'onRecvC2CReadReceipt':
-                List dataList = params;
-                List<V2TimMessageReceipt> receiptList =
-                    List.empty(growable: true);
-                dataList.forEach((element) {
-                  receiptList.add(V2TimMessageReceipt.fromJson(element));
-                });
-                listener.onRecvC2CReadReceipt(receiptList);
-                break;
-              case 'onRecvMessageRevoked':
-                listener.onRecvMessageRevoked(params);
-                break;
-              case 'onSendMessageProgress':
-                listener.onSendMessageProgress(
-                  V2TimMessage.fromJson(params['message']),
-                  params['progress'],
-                );
-                break;
-            }
-          }
-        } else if (call.method == ListenerType.conversationListener) {
-          Map<String, dynamic> data = this.formatJson(call.arguments);
-          String listenerUuid = data['listenerUuid'];
-          String type = data['type'];
-
-          V2TimConversationListener? listener =
-              this.v2ConversationManager.conversationListenerList[listenerUuid];
-          if (listener != null) {
-            switch (type) {
-              case 'onSyncServerStart':
-                listener.onSyncServerStart();
-                break;
-              case 'onSyncServerFinish':
-                listener.onSyncServerFinish();
-                break;
-              case 'onSyncServerFailed':
-                listener.onSyncServerFailed();
-                break;
-              case 'onNewConversation':
-                dynamic params = data['data'] == null
-                    ? List.empty(growable: true)
-                    : List.from(data['data']);
-                List<V2TimConversation> conversationList =
-                    List.empty(growable: true);
-                params.forEach((element) {
-                  conversationList.add(V2TimConversation.fromJson(element));
-                });
-                listener.onNewConversation(conversationList);
-                break;
-              case 'onConversationChanged':
-                dynamic params = data['data'] == null
-                    ? List.empty(growable: true)
-                    : List.from(data['data']);
-                List<V2TimConversation> conversationList =
-                    List.empty(growable: true);
-                params.forEach((element) {
-                  conversationList.add(V2TimConversation.fromJson(element));
-                });
-                listener.onConversationChanged(conversationList);
-                break;
-              case 'onTotalUnreadMessageCountChanged':
-                dynamic params = data['data'] == null ? 0 : data['data'];
-                listener.onTotalUnreadMessageCountChanged(params);
-                break;
-            }
-          }
-        } else if (call.method == ListenerType.friendListener) {
-          Map<String, dynamic> data = this.formatJson(call.arguments);
-          String listenerUuid = data['listenerUuid'];
-          String type = data['type'];
-          dynamic params =
-              data['data'] == null ? new Map<String, dynamic>() : data['data'];
-          V2TimFriendshipListener? listener =
-              this.v2TIMFriendshipManager.friendListenerList[listenerUuid];
-          switch (type) {
-            case 'onFriendApplicationListAdded':
-              List applicationListMap = params;
-              List<V2TimFriendApplication> applicationList =
-                  List.empty(growable: true);
-              applicationListMap.forEach((element) {
-                applicationList.add(V2TimFriendApplication.fromJson(element));
-              });
-              listener!.onFriendApplicationListAdded(applicationList);
-              break;
-            case 'onFriendApplicationListDeleted':
-              List<String> userIDList = List.from(params);
-              listener!.onFriendApplicationListDeleted(userIDList);
-              break;
-            case 'onFriendApplicationListRead':
-              listener!.onFriendApplicationListRead();
-              break;
-            case 'onFriendListAdded':
-              List userMap = params;
-              List<V2TimFriendInfo> users = List.empty(growable: true);
-              userMap.forEach((element) {
-                users.add(V2TimFriendInfo.fromJson(element));
-              });
-              listener!.onFriendListAdded(users);
-              break;
-            case 'onFriendListDeleted':
-              List<String> userList = List.from(params);
-              listener!.onFriendListDeleted(userList);
-              print("onFriendListDeleted");
-              break;
-            case 'onBlackListAdd':
-              List infoListMap = params;
-              List<V2TimFriendInfo> infoList = List.empty(growable: true);
-              infoListMap.forEach((element) {
-                infoList.add(V2TimFriendInfo.fromJson(element));
-              });
-              listener!.onBlackListAdd(infoList);
-              print("onBlackListAdd");
-              break;
-            case 'onBlackListDeleted':
-              List<String> userList = List.from(params);
-              listener!.onBlackListDeleted(userList);
-              break;
-            case 'onFriendInfoChanged':
-              List infoListMap = params;
-              List<V2TimFriendInfo> infoList = List.empty(growable: true);
-              infoListMap.forEach((element) {
-                infoList.add(V2TimFriendInfo.fromJson(element));
-              });
-              listener!.onFriendInfoChanged(infoList);
-              break;
-          }
-        } else if (call.method == 'logFromSwift') {
-          var data = call.arguments["data"];
-          var msg = call.arguments["msg"];
-          print('========> $msg: $data');
-        } else if (call.method == ListenerType.signalingListener) {
-          Map<String, dynamic> d = this.formatJson(call.arguments);
-          String listenerUuid = d['listenerUuid'];
-          String type = d['type'];
-          Map<String, dynamic> params = d['data'];
-          String inviteID =
-              params['inviteID'] == null ? '' : params['inviteID'];
-          String inviter = params['inviter'] == null ? '' : params['inviter'];
-          String groupID = params['groupID'] == null ? '' : params['groupID'];
-          List<String>? inviteeList = params['inviteeList'] == null
-              ? null
-              : List.from(params['inviteeList']);
-          String data = params['data'] == null ? '' : params['data'];
-          String invitee = params['invitee'] == null ? '' : params['invitee'];
-          V2TimSignalingListener? listener =
-              this.v2timSignalingManager.signalingListenerList[listenerUuid];
-          switch (type) {
-            case 'onReceiveNewInvitation':
-              listener!.onReceiveNewInvitation(
-                  inviteID, inviter, groupID, inviteeList!, data);
-              break;
-            case 'onInviteeAccepted':
-              listener!.onInviteeAccepted(inviteID, invitee, data);
-              break;
-            case 'onInviteeRejected':
-              listener!.onInviteeRejected(inviteID, invitee, data);
-              break;
-            case 'onInvitationCancelled':
-              listener!.onInvitationCancelled(inviteID, inviter, data);
-              break;
-            case 'onInvitationTimeout':
-              listener!.onInvitationTimeout(inviteID, inviteeList!);
-              break;
-          }
-        }
-      } catch (err) {
-        print(
-            "重点关注，回调失败了，数据类型异常。$err ${call.method} ${call.arguments['type']} ${call.arguments['data']}");
-      }
-      return Future.value(null);
-    });
-  }
-
-  /// 初始化SDK
-  ///
-  /// 参数
-  ///
-  /// ```
-  /// @required int sdkAppID	应用 ID，必填项，可以在控制台中获取
-  /// @required LogLevelEnum loglevel	配置信息
-  /// @required [InitListener] listener	SDK的回调
-  /// ```
-  ///
-  /// 返回
-  /// ```
-  /// true：成功；
-  /// false：失败
-  /// ```
   Future<V2TimValueCallback<bool>> initSDK({
     required int sdkAppID,
     required LogLevelEnum loglevel,
     required V2TimSDKListener listener,
+    bool? showImLog = true,
+    List<V2TimPlugins>? plugins,
   }) {
-    final String uuid = Uuid().v4();
-    this.initSDKListenerList[uuid] = listener;
-    return ImFlutterPlatform.instance.initSDK(
+    int platform = _getUiPlatform(StackTrace.current.toString());
+    currentLoginInfo["a"] = sdkAppID.toString();
+    return TencentCloudChatSdkPlatform.instance.initSDK(
       sdkAppID: sdkAppID,
-      loglevel: EnumUtils.convertLogLevelEnum(loglevel),
-      listenerUuid: uuid,
+      loglevel: loglevel.index,
+      listener: listener,
+      uiPlatform: platform,
+      showImLog: showImLog,
+      plugins: plugins ?? [],
+    );
+  }
+
+  Future<void> emitUIKitEvent(UIKitEvent event) async {
+    return TencentCloudChatSdkPlatform.instance.emitUIKitEvent(event);
+  }
+
+  Future<void> emitPluginEvent(PluginEvent event) async {
+    return TencentCloudChatSdkPlatform.instance.emitPluginEvent(event);
+  }
+
+  String addUIKitListener({
+    required V2TimUIKitListener listener,
+  }) {
+    return TencentCloudChatSdkPlatform.instance.addUIKitListener(
       listener: listener,
     );
   }
 
+  void emitUIKitListener({
+    required Map<String, dynamic> data,
+  }) {
+    TencentCloudChatSdkPlatform.instance.emitUIKitListener(
+      data: data,
+    );
+  }
+
+  void removeUIKitListener({
+    String? uuid,
+  }) {
+    TencentCloudChatSdkPlatform.instance.removeUIKitListener(
+      uuid: uuid,
+    );
+  }
+
+  ///@nodoc
+  int _getUiPlatform(String trace) {
+    int platfrom = TencentIMSDKCONST.Flutter;
+    if (trace.contains(TencentIMSDKCONST.FlutterUIKitPkg) ||
+        trace.contains(TencentIMSDKCONST.FlutterUIKitPkgLatest)) {
+      platfrom = TencentIMSDKCONST.FlutterUIKit;
+    } else if (trace.contains(TencentIMSDKCONST.FlutterPlugin_35_pkg)) {
+      platfrom = TencentIMSDKCONST.FlutterUIKitPlus;
+    }
+    return platfrom;
+  }
+
   ///反初始化 SDK
   ///
-  Future<V2TimCallback> unInitSDK() {
-    this.initSDKListenerList = {};
-    return ImFlutterPlatform.instance.unInitSDK();
+  Future<V2TimCallback> unInitSDK() async {
+    await TencentCloudChatSdkPlatform.instance.removeAdvancedMsgListener();
+    await TencentCloudChatSdkPlatform.instance.removeConversationListener();
+    await TencentCloudChatSdkPlatform.instance.removeFriendListener();
+    await TencentCloudChatSdkPlatform.instance.removeGroupListener();
+    await TencentCloudChatSdkPlatform.instance.removeSimpleMsgListener();
+    await TencentCloudChatSdkPlatform.instance.removeSignalingListener();
+    return TencentCloudChatSdkPlatform.instance.unInitSDK();
   }
 
   /// 获取版本号
   ///
   Future<V2TimValueCallback<String>> getVersion() {
-    return ImFlutterPlatform.instance.getVersion();
+    return TencentCloudChatSdkPlatform.instance.getVersion();
   }
 
   /// 获取服务器当前时间
@@ -599,7 +165,7 @@ class V2TIMManager {
   /// 注意： web不支持该接口
   ///
   Future<V2TimValueCallback<int>> getServerTime() {
-    return ImFlutterPlatform.instance.getServerTime();
+    return TencentCloudChatSdkPlatform.instance.getServerTime();
   }
 
   /// 登录
@@ -625,8 +191,14 @@ class V2TIMManager {
   Future<V2TimCallback> login({
     required String userID,
     required String userSig,
-  }) {
-    return ImFlutterPlatform.instance.login(userID: userID, userSig: userSig);
+  }) async {
+    V2TimCallback res = await TencentCloudChatSdkPlatform.instance
+        .login(userID: userID, userSig: userSig);
+    if (res.code == 0) {
+      currentLoginInfo["u"] = userID;
+      currentLoginInfo["s"] = userSig;
+    }
+    return res;
   }
 
   /// 登出
@@ -635,13 +207,13 @@ class V2TIMManager {
   /// 退出登录，如果切换账号，需要 logout 回调成功或者失败后才能再次 login，否则 login 可能会失败。
   ///```
   Future<V2TimCallback> logout() async {
-    return ImFlutterPlatform.instance.logout();
+    return TencentCloudChatSdkPlatform.instance.logout();
   }
 
   /// 获取登录用户
   ///
   Future<V2TimValueCallback<String>> getLoginUser() async {
-    return ImFlutterPlatform.instance.getLoginUser();
+    return TencentCloudChatSdkPlatform.instance.getLoginUser();
   }
 
   /// 获取登录状态
@@ -662,7 +234,7 @@ class V2TIMManager {
   /// 注意： web不支持该接口
   ///
   Future<V2TimValueCallback<int>> getLoginStatus() async {
-    return ImFlutterPlatform.instance.getLoginStatus();
+    return TencentCloudChatSdkPlatform.instance.getLoginStatus();
   }
 
   /// 发送单聊普通文本消息（最大支持 8KB）（自3.6.0开始弃用，请使用MessageManager下的高级收发消息）
@@ -687,7 +259,7 @@ class V2TIMManager {
   }) async {
     printWarning(
         "tencent_im_sdk_plugin：简单消息接口自3.6.0开始弃用，请使用messageManager下的高级收发消息,此接口将在以后版本中被删除）");
-    return ImFlutterPlatform.instance.sendC2CTextMessage(
+    return TencentCloudChatSdkPlatform.instance.sendC2CTextMessage(
       text: text,
       userID: userID,
     );
@@ -715,7 +287,7 @@ class V2TIMManager {
     required String userID,
   }) async {
     printWarning("简单消息自3.6.0开始弃用，请使用messageManager下的高级收发消息,此接口将在以后版本中被删除）");
-    return ImFlutterPlatform.instance.sendC2CCustomMessage(
+    return TencentCloudChatSdkPlatform.instance.sendC2CCustomMessage(
       customData: customData,
       userID: userID,
     );
@@ -749,7 +321,7 @@ class V2TIMManager {
     int priority = 0,
   }) async {
     printWarning("简单消息自3.6.0开始弃用，请使用messageManager下的高级收发消息,此接口将在以后版本中被删除）");
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .sendGroupTextMessage(text: text, groupID: groupID, priority: priority);
   }
 
@@ -777,13 +349,14 @@ class V2TIMManager {
   Future<V2TimValueCallback<V2TimMessage>> sendGroupCustomMessage({
     required String customData,
     required String groupID,
-    MessagePriorityEnum priority = MessagePriorityEnum.V2TIM_PRIORITY_NORMAL,
+    MessagePriorityEnum? priority = MessagePriorityEnum.V2TIM_PRIORITY_NORMAL,
   }) async {
     printWarning("简单消息自3.6.0开始弃用，请使用messageManager下的高级收发消息,此接口将在以后版本中被删除）");
-    return ImFlutterPlatform.instance.sendGroupCustomMessage(
-        customData: customData,
-        groupID: groupID,
-        priority: EnumUtils.convertMessagePriorityEnum(priority));
+    return TencentCloudChatSdkPlatform.instance.sendGroupCustomMessage(
+      customData: customData,
+      groupID: groupID,
+      priority: priority!.index,
+    );
   }
 
   /// 创建群组
@@ -809,12 +382,13 @@ class V2TIMManager {
   ///```
   /// 不支持在同一个 SDKAPPID 下创建两个相同 groupID 的群
   /// ```
+  @Deprecated('简单创建群组自3.6.0开始弃用，请使用groupManager下的高级创建群组,此接口将在以后版本中被删除')
   Future<V2TimValueCallback<String>> createGroup({
     required String groupType,
     required String groupName,
     String? groupID,
   }) async {
-    return ImFlutterPlatform.instance.createGroup(
+    return TencentCloudChatSdkPlatform.instance.createGroup(
         groupType: groupType, groupName: groupName, groupID: groupID);
   }
 
@@ -833,7 +407,7 @@ class V2TIMManager {
     required String message,
     String? groupType,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .joinGroup(groupID: groupID, message: message, groupType: groupType);
   }
 
@@ -847,7 +421,7 @@ class V2TIMManager {
   Future<V2TimCallback> quitGroup({
     required String groupID,
   }) async {
-    return ImFlutterPlatform.instance.quitGroup(groupID: groupID);
+    return TencentCloudChatSdkPlatform.instance.quitGroup(groupID: groupID);
   }
 
   /// 解散群组
@@ -861,7 +435,7 @@ class V2TIMManager {
   Future<V2TimCallback> dismissGroup({
     required String groupID,
   }) async {
-    return ImFlutterPlatform.instance.dismissGroup(groupID: groupID);
+    return TencentCloudChatSdkPlatform.instance.dismissGroup(groupID: groupID);
   }
 
   /// 获取用户资料
@@ -875,7 +449,7 @@ class V2TIMManager {
   Future<V2TimValueCallback<List<V2TimUserFullInfo>>> getUsersInfo({
     required List<String> userIDList,
   }) async {
-    return ImFlutterPlatform.instance.getUsersInfo(
+    return TencentCloudChatSdkPlatform.instance.getUsersInfo(
       userIDList: userIDList,
     );
   }
@@ -885,7 +459,8 @@ class V2TIMManager {
   Future<V2TimCallback> setSelfInfo({
     required V2TimUserFullInfo userFullInfo,
   }) async {
-    return ImFlutterPlatform.instance.setSelfInfo(userFullInfo: userFullInfo);
+    return TencentCloudChatSdkPlatform.instance
+        .setSelfInfo(userFullInfo: userFullInfo);
   }
 
   /// 实验性 API 接口
@@ -893,7 +468,7 @@ class V2TIMManager {
   /// 参数
   /// api	接口名称
   /// param	接口参数
-  // 注意
+  /// 注意
   /// 该接口提供一些实验性功能
   ///
   /// 注意：web不支持该接口
@@ -902,7 +477,7 @@ class V2TIMManager {
     required String api,
     Object? param,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .callExperimentalAPI(api: api, param: param);
   }
 
@@ -914,7 +489,7 @@ class V2TIMManager {
   /// 高级消息管理类实例
   /// ```
   V2TIMMessageManager getMessageManager() {
-    return this.v2TIMMessageManager;
+    return V2TIMMessageManager();
   }
 
   /// 高级群组功能入口
@@ -925,7 +500,7 @@ class V2TIMManager {
   /// 高级群组管理类实例
   /// ```
   V2TIMGroupManager getGroupManager() {
-    return this.v2TIMGroupManager;
+    return V2TIMGroupManager();
   }
 
   /// 会话功能入口
@@ -936,7 +511,11 @@ class V2TIMManager {
   /// 会话管理类实例
   /// ```
   V2TIMConversationManager getConversationManager() {
-    return this.v2ConversationManager;
+    return V2TIMConversationManager();
+  }
+
+  V2TIMCommunityManager getCommunityManager(){
+    return V2TIMCommunityManager();
   }
 
   /// 关系链功能入口
@@ -947,7 +526,7 @@ class V2TIMManager {
   /// 关系链管理类实例
   /// ```
   V2TIMFriendshipManager getFriendshipManager() {
-    return this.v2TIMFriendshipManager;
+    return V2TIMFriendshipManager();
   }
 
   /// 离线推送功能入口
@@ -958,7 +537,7 @@ class V2TIMManager {
   /// 离线推送功能类实例
   /// ```
   V2TIMOfflinePushManager getOfflinePushManager() {
-    return this.v2TIMOfflinePushManager;
+    return V2TIMOfflinePushManager();
   }
 
   /// 信令入口
@@ -969,7 +548,7 @@ class V2TIMManager {
   /// 信令管理类实例
   /// ```
   V2TIMSignalingManager getSignalingManager() {
-    return this.v2timSignalingManager;
+    return V2TIMSignalingManager();
   }
 
   /// 设置基本消息（文本消息和自定义消息）的事件监听器
@@ -980,13 +559,11 @@ class V2TIMManager {
   /// 图片消息、视频消息、语音消息等高级消息的监听，请参考: V2TIMMessageManager.addAdvancedMsgListener(V2TIMAdvancedMsgListener) 。
   /// ```
   @Deprecated('简单消息自3.6.0开始弃用，请使用messageManager下的高级收发消息,此接口将在以后版本中被删除')
-  Future<void> addSimpleMsgListener({
+  Future<String> addSimpleMsgListener({
     required V2TimSimpleMsgListener listener,
   }) {
-    final uuid = Uuid().v4();
-    this.simpleMessageListenerList[uuid] = listener;
-    return ImFlutterPlatform.instance
-        .addSimpleMsgListener(listener: listener, listenerUuid: uuid);
+    return TencentCloudChatSdkPlatform.instance
+        .addSimpleMsgListener(listener: listener);
   }
 
   /// 移除基本消息（文本消息和自定义消息）的事件监听器
@@ -994,18 +571,14 @@ class V2TIMManager {
   /// 如果传入listener，会移除指定listener的事件监听器。如果未传入listener会移除所有addSimpleMsgListener的事件监听器。
   ///
   @Deprecated('简单消息自3.6.0开始弃用，请使用messageManager下的高级收发消息,此接口将在以后版本中被删除')
-  Future<void> removeSimpleMsgListener({V2TimSimpleMsgListener? listener}) {
-    var listenerUuid = "";
-    if (listener != null) {
-      listenerUuid = this.simpleMessageListenerList.keys.firstWhere(
-          (k) => this.simpleMessageListenerList[k] == listener,
-          orElse: () => "");
-      this.simpleMessageListenerList.remove(listenerUuid);
-    } else {
-      this.simpleMessageListenerList.clear();
-    }
-    return ImFlutterPlatform.instance
-        .removeSimpleMsgListener(listenerUuid: listenerUuid);
+  Future<void> removeSimpleMsgListener({
+    V2TimSimpleMsgListener? listener,
+    String? uuid,
+  }) {
+    return TencentCloudChatSdkPlatform.instance.removeSimpleMsgListener(
+      listener: listener,
+      uuid: uuid,
+    );
   }
 
   /// 设置群组监听器
@@ -1015,16 +588,134 @@ class V2TIMManager {
   Future<void> setGroupListener({
     required V2TimGroupListener listener,
   }) {
-    final uuid = Uuid().v4();
-    this.groupListenerList[uuid] = listener;
-    return ImFlutterPlatform.instance
-        .setGroupListener(listener: listener, listenerUuid: uuid);
+    return TencentCloudChatSdkPlatform.instance
+        .setGroupListener(listener: listener);
+  }
+
+  /// 添加群组监听器
+  ///
+  /// 在web端时，不支持onQuitFromGroup回调
+  ///
+  Future<void> addGroupListener({
+    required V2TimGroupListener listener,
+  }) {
+    return TencentCloudChatSdkPlatform.instance
+        .addGroupListener(listener: listener);
+  }
+
+  /// 移除群组监听器
+  ///
+  ///
+  Future<void> removeGroupListener({
+    V2TimGroupListener? listener,
+  }) {
+    return TencentCloudChatSdkPlatform.instance
+        .removeGroupListener(listener: listener);
+  }
+
+  /// 能力位检测
+  ///
+  ///
+  Future<V2TimValueCallback<int>> checkAbility() {
+    return TencentCloudChatSdkPlatform.instance.checkAbility();
+  }
+
+  /// 获取用户在线状态
+  /// 注意：4.0.3版本开始支持，web不支持
+  ///
+  ///
+  Future<V2TimValueCallback<List<V2TimUserStatus>>> getUserStatus({
+    required List<String> userIDList,
+  }) {
+    return TencentCloudChatSdkPlatform.instance
+        .getUserStatus(userIDList: userIDList);
+  }
+
+  /// 设置当前登录用户在线状态
+  /// 注意：4.0.3版本开始支持，web不支持
+  ///
+  ///
+  Future<V2TimCallback> setSelfStatus({
+    required String status,
+  }) {
+    return TencentCloudChatSdkPlatform.instance.setSelfStatus(status: status);
+  }
+
+  /// 订阅用户状态
+  /// 注意：4.0.8版本开始支持，web不支持
+  /// 当成功订阅用户状态后，当对方的状态（包含在线状态、自定义状态）发生变更后，您可以监听 @onUserStatusChanged 回调来感知
+  /// 如果您需要订阅好友列表的状态，您只需要在控制台上打开开关即可，无需调用该接口
+  /// 该接口不支持订阅自己，您可以通过监听 @onUserStatusChanged 回调来感知自身的自定义状态的变更
+  /// 订阅列表有个数限制，超过限制后，会自动淘汰最先订阅的用户
+  /// 该功能为 IM 旗舰版功能，购买旗舰版套餐包后可使用，详见价格说明。
+  ///
+  ///
+  Future<V2TimCallback> subscribeUserStatus({
+    required List<String> userIDList,
+  }) {
+    return TencentCloudChatSdkPlatform.instance
+        .subscribeUserStatus(userIDList: userIDList);
+  }
+
+  /// 取消订阅用户状态
+  /// 注意：4.0.8版本开始支持，web不支持
+  /// 当 userIDList 为空或者 nil 时，取消当前所有的订阅
+  /// 该功能为 IM 旗舰版功能，购买旗舰版套餐包后可使用，详见价格说明。
+  Future<V2TimCallback> unsubscribeUserStatus({
+    required List<String> userIDList,
+  }) {
+    return TencentCloudChatSdkPlatform.instance
+        .unsubscribeUserStatus(userIDList: userIDList);
   }
 
   /// 设置apns监听
   ///
   Future setAPNSListener() {
-    return ImFlutterPlatform.instance.setAPNSListener();
+    return TencentCloudChatSdkPlatform.instance.setAPNSListener();
+  }
+
+  Future<void> uikitTrace({
+    required String trace,
+  }) async {
+    TencentCloudChatSdkPlatform.instance.uikitTrace(trace: trace);
+  }
+
+  /// 订阅用户资料，从 6.0.0 版本开始支持
+  /// 参数
+  /// userIDList	待订阅的用户 ID
+  /// 注意
+  /// 请注意
+  /// 该接口用于订阅陌生人的资料变更事件，订阅成功后，当订阅用户资料发生变更，您可以通过监听 onUserInfoChanged 回调来感知
+  /// 订阅列表最多允许订阅 200 个，超过限制后，会自动淘汰最先订阅的用户
+  /// 自己的资料变更通知不需要订阅，默认会通过 onSelfInfoUpdated 回调通知给您
+  /// 好友的资料变更通知不需要订阅，默认会通过 onFriendInfoChange 回调通知给您
+  /// 该功能为 IM 旗舰版功能，购买旗舰版套餐包后可使用，详见价格说明。
+  Future<V2TimCallback> subscribeUserInfo({
+    required List<String> userIDList,
+  }) {
+    return TencentCloudChatSdkPlatform.instance
+        .subscribeUserInfo(userIDList: userIDList);
+  }
+
+  /// 取消订阅用户资料，从 6.0.0 版本开始支持
+  /// 参数
+  /// userIDList	需要取消订阅的用户 ID
+  /// 注意
+  /// 当 userIDList 为空时，取消当前所有的订阅
+  /// 该功能为 IM 旗舰版功能，购买旗舰版套餐包后可使用，详见价格说明。
+  Future<V2TimCallback> unsubscribeUserInfo({
+    required List<String> userIDList,
+  }) {
+    return TencentCloudChatSdkPlatform.instance
+        .unsubscribeUserInfo(userIDList: userIDList);
+  }
+
+  Map<String, String> getCurrentLoginInfo() {
+    String trace = StackTrace.current.toString();
+    if (trace.contains("tencent_cloud_chat_push")) {
+      return currentLoginInfo;
+    }
+    return {};
   }
 
   ///@nodoc
@@ -1039,6 +730,6 @@ class V2TIMManager {
   }
 
   void printWarning(String text) {
-    print('\x1B[33m$text\x1B[0m');
+    debugPrint('\x1B[33m$text\x1B[0m');
   }
 }

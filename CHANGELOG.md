@@ -1,492 +1,358 @@
-## 0.0.1
+## 8.0.5903
+* fix compilation issues on Windows platform.
 
-* init version
+## 8.0.5902
+* fix search api. change return type from native.
 
-## 0.0.2
+## 8.0.5901
+* fix groupmember info bug on ios
+* remove url encode when download file on macos
 
-* change sdk name
+## 8.0.5899
+* fix customdata wstring error on windows
+* add flutter log
+* add searchcloudmessage on web
 
-## 0.0.3
+## 8.0.5897
+* fix initve and inviteInGroup api bug on windows
 
-* change licese 
+## 8.0.5896
+* 【Important】Align the mark field in conversation with native. When using it, the right shift operation will no longer be performed.
 
-## 0.0.4
+## 8.0.5895
+* The Flutter download directory is moved from the temp directory to the document directory, and the local obtains the compatible temp directory.
+* The underlying dependencies are upgraded to 8.0.5895, iOS uses xcframeworker instead of framework
+* Offline push supports configuring the right picture of the notification, only supports Huawei, Honor, fcm and iOS
+* Added voice-to-text capability on web
 
-* add readme
+## 7.9.5695
+* add translate api default value
 
-## 0.0.5
 
-* change conversion return data
+## 7.9.5694
+* url encode when download file
 
-## 0.0.6
+## 7.9.5693
+* add some log in download method
 
-* add document
+## 7.9.5692
+* fix delete user and userID is null;
 
-## 0.0.7
+## 7.9.5691
+* fix create message invalid msgid and timestamp
+* fix message reaction invalid messageID;
+* upgrade windows dep to 8.0
+* fix web message reaction bugs
 
-* add other document
+## 7.9.5690
+* fix merge message bug
+* add some web api
 
-## 0.0.8
 
-* change document
+## 7.9.5689
+* fix windows bugs
+* downgrade flutter sdk version
 
-## 0.0.9
+## 7.9.5686
+* Fix getMessageReactions bug
 
-* change document
 
-## 0.0.9
+## 7.9.5683
+* Fix checkFollowType bug
 
-* 设置对外不可见
+## 7.9.5681
+* Fix PinGroupMessage group tips bug
+* Fix mergeMessage abstractList wstring bug on windows
+* Fix FaceMessage bug
 
-## 0.0.12
+## 7.9.5672
+* Fix setTopicInfo bug
 
-* 更改配置
+## 7.9.5671
+* Fix create group defaut param
 
-## 0.0.13
+## 7.9.5670
+* Fix translate api
 
-* 更改会话列表传参类型
+## 7.9.5669
+* Added group message pinned API and group message pinned callback
+* Fixed the bug of video message localurl exception
+* Upgrade all underlying dependencies to 7.9+
 
-## 0.0.13
+## 7.9.5668
+*  Fixed the issue of duplicate digests of merged forwarded messages.
+*  Fixed the problem of being unable to download large images.
+*  Fixed the problem of wrong group type.
+*  Fixed an issue where message custom data could not be set.
+*  Fixed the issue of message forwarding failure.
+*  Add cleanConversationUnreadMessageCount for web
 
-* 已知bug修复
+## 7.8.5509
+*  Adapt to the latest version of web
 
-## 0.0.15
+## 7.8.5508
+*  update native sdk. fix download bugs
 
-* 新增insertMessageToLocalStorage接口
 
-## 0.0.16
+## 7.7.5321
+*  add CallExperimentalAPI support on windows platform
 
-* 修改插入本地消息的类型textMessage to customMessage
+## 7.7.5317
+*  Optimize desktop
 
-## 0.0.17
 
-* 兼容R8
+## 6.1.33
+*  remove write log 
 
-## 0.0.18
+## 6.1.32
+*  change create group approveopt default value to forbid
 
+## 6.1.31
+*  add application type
+
+## 6.1.29
+*  add create group approve opt support
+
+## 6.1.28
+*  add is peer read field
+
+## 6.1.27
+*  add getwidget for plugin
+
+## 6.1.21
+* fix download bug 
+
+## 6.1.20
+* change topicfaceurl to faceurl
+
+
+## 6.1.16
+* fix get history by time bug
+
+## 6.1.15
+* fix marktype bug
+
+## 6.1.14
+* Compatible with lower version java sdk
+
+## 6.1.13
+* remove uninitSDK before initSDK
+
+## 6.1.12
+* add plugin support
+
+## 6.1.8 & 6.1.9 & 6.1.10 & 6.1.11
+* add default unreadcount filter is false;
+
+## 6.1.6 & 6.1.7
+* add get history message by time support
+
+## 6.1.5
+* add get history message by time support
+
+
+## 6.1.4
+* upgrade interface
+
+## 6.1.3
+* add send message config
+
+## 6.1.2
+* add donwload temp file
+
+## 6.1.1
+* add groupinfo change int value
+
+## 6.0.9 && 6.1.0
+* fix fileelem local url bug
+
+## 6.0.8
+* fix getCOnversationListByFilter bug on android
+
+## 6.0.6
+* add example and kickgroupmember duration param
+
+## 6.0.3
+* add delete converastion list
+
+## 6.0.2
+* fix getMessageById bug
+
+## 6.0.0
+* Non-friend user profile update monitoring
+* Non-friend user profile update callback
+* Callback for banning all members of the group
+* Group member mark & ​​group member mark callback
+* Added message response interface and callback
+* Added message recall with recall information callback
+* Set global message receiving options Complete
+* Message cloud search
+* Session delete callback
+* The session performs unread statistics callback according to the specified classification.
+* Delete sessions in batches
+* Go back to session unread by category Done
+* Listen to session unread changes according to the specified type
+* Clear session unreads (markxxxAsRead interface is deprecated)
+* Improve offline push fields
+* speech to text
+
+## 5.2.5 && 5.2.6
+* Compatible with lower versions of flutter
+
+## 5.2.4
+* add message hasRiskContent feild
+
+## 5.2.2 && 5.2.3
+* avchat room support find message bug fix
+
+## 5.2.1
+* avchat room support find message
+
+## 5.2.0
+* update interface
+
+## 5.1.9
+* fix log bug
+
+## 5.1.8
+* fix create topic bug
+
+## 5.1.7
+* fix create avchatroom bug
+
+## 5.1.6
+* update native dep
+
+## 5.1.5
+* update interface
+
+## 5.1.3
+* message extension bug fix
+* file path exsit logic
+
+## 5.1.3
+* Support multiple listeners to register and remove multiple times
+* Support upgrade to the underlying SDK to the latest plus version
+* fix bugs
+
+## 5.0.9
+* Support setting voip
+* Support quic acceleration & local database encryption
+* Taking into account the bug that the web sends the file and then downloads the native file without the file.
+* Fix some bugs on the desktop
+
+## 5.0.8
+* Added: group counting capability, common group and live group support group counter meta counter, for details, please refer to groupCounter related API
+* Added: text message translation capability, see [translateText](https://cloud.tencent.com/document/product/269/85380) for details.
+* Upgrade: Upgrade Native SDK to 7.0
+
+
+## 5.0.6
 * update native sdk
 
-## 0.0.19
+## 5.0.4
+* Migration from tencent_im_sdk_plugin
+
+## 5.0.2
+* [Incompatible update] Multimedia messages no longer return url by default, and need to be obtained through getMessageOnlineUrl
+* [Partially incompatible update] Multimedia messages will not return localurl by default, and will only return after the message is successfully downloaded through downloadMessage
+* Add onMessageDownloadProgressCallback to advanceMessageListener, which will be triggered when the multimedia message download progress is updated
+* The disableBadgeNumber method is added on the ios side. After calling, the IMSDK is in the background of the application, and the application badge will not be set by default.
+* Optimized the problem of channel instance coverage in multiple flutter engine scenarios
+* The bottom dynamic library download logic is optimized on the PC side
+* Upgrade the underlying SDK to 6.8
+
+## 4.2.0
+* Fix invite api miss offlinepushInfo
+
+
+## 4.1.9
+* Fix high version jdk conversion problem
+* Support macOS and Windows
+* Upgrade the underlying SDK
+* Support message extension
+* Support signaling editing
+* Fixed several issues
+
+## 4.1.3
+* flutter for web 
+
+## 4.1.1+2
+* Upgrade native SDK to 6.6.x
+* web signal support
+* flutter for web support
+
+## 4.1.0
+* Upgrade native SDK
+* Fix iOS search group member bug
+* web sdk only supports the latest version
+
+## 4.0.8-bugfix
+* fix modifyMessage bug on Android
+
+## 4.0.8
+* Added an advanced interface for obtaining sessions, which supports pulling sessions by session type, tag, and grouping
+* Support marked sessions, such as star, fold, hide, etc.
+* Support setting session custom fields
+* Support session grouping
+* The SDK dependency flutter version is reduced to 2.0.0
+* Support multiple flutter engines
+* Offline push support to configure Android push sound
+* Support subscriber online status change by user id
+* Fix the bug that the group information cannot be found in the topic group
+* Upgrade the native sdk version to 6.5
+
+## 4.0.7
+* ios newly added front-end and back-end api, cut back-end can set the unread to the corner mark
+* Optimize group application processing logic
+
+## 4.0.5
+* Fix doBackgroup bug
+
+## 4.0.5
+* Fix upload token bug
+
+## 4.0.4
+* Support user online status query
+* Get the list of historical messages and support pulling by message type
+* Fix thread safety issues in special cases
+* Support sending multi-element messages
+
+## 4.0.3-bugfix
+* fix InitSDKListener bug
+
+## 4.0.2
+* Local video url bug fix
+
+## 4.0.1
+* Added topic related interface
+* Added message editing interface
+
+## 4.0.0
+* Upgrade the underlying SDK version to 6.2.x
+* fix offlinePush info bug
+
+## 3.9.3
+* Upgrade the underlying SDK version to 6.2.x
+* Fix the problem that the group ban group tips boolValue is lost
+* Fixed the problem that the nameCard field was not parsed for session instances
+* Added group read receipt related interface
+* flutter for web perfect
+
+## 3.9.2
+* Upgrade the ios library version to 6.1.2155.1
+
+## 3.9.1
+* Upgrade the underlying library version to 6.1.2155
+
+## 3.9.0
+* Modify grouplistener
+
+## 3.8.9
+* Monitor registration problem fix
+
+## 3.8.8
+* Monitor registration problem fix
 
-* 正式上线版本
-
-## 1.0.0
-
-* 更新最新版文档
-
-## 1.0.1
-
-* 更新最新版文档
-
-## 1.0.2
-
-* 更新最新版文档
-
-## 1.0.3
-
-* 更新最新版文档
-
-## 1.0.4
-
-* 更新native sdk到5.1.129
-
-## 1.0.5
-
-* 修复deleteFriendApplication传参错误
-
-## 1.0.6
-
-* 更新native sdk到5.1.132
-
-## 1.0.7
-
-* 更新native sdk到5.1.137
-
-## 1.0.8
-
-* 修改信令邀请接口传参bug
-
-## 1.0.9
-
-* 修复信令接口不返回id
-
-## 1.0.10
-
-* 修改sdk压缩配置
-
-## 1.0.11
-
-* 修改sdk压缩配置
-
-## 1.0.12
-
-* 修改信令回调bug
-
-## 1.0.13
-
-* 修改自定义消息返回数据
-
-## 1.0.14
-
-* 【重要】信令消息返回内容格式修改，用到信令请更新到该版本或以上版本
-
-## 1.0.15
-
-* 新增群成员自定义字段
-
-## 1.0.16
-
-* 修改一些已知bug
-
-## 1.0.17
-
-* 完善ios信令
-
-## 1.0.18
-
-* 修复已知bug
-
-## 1.0.19
-
-* iOS信令bug修复
-
-## 1.0.20
-
-* iOS信令bug修复
-
-## 1.0.21
-
-* iOS信令bug修复
-
-## 1.0.22
-
-* 自定义字段解析成String返回
-
-## 1.0.23
-
-* 优化设置个人自定义字段
-
-## 1.0.24
-
-* 优化设置个人自定义字段
-
-## 1.0.25
-
-* 更新Android getHistoryMessageList
-
-## 1.0.26
-
-* 修复Android端checkFriend传参错误
-
-## 1.0.27
-
-* 修复Android端checkFriend传参错误
-
-## 1.0.28
-
-* 【重要】checkFriends接口入参改变
-
-## 1.0.29
-
-* 【重要】修复获取群成员列表传参报错
-
-## 1.0.30
-
-* 修复自定义消息data字段为null时crash
-
-## 1.0.31
-
-* 修复自定义消息data字段为null时crash
-
-## 1.0.32
-
-* 修复会话信息lastMessage为空时crash
-
-## 1.0.33
-
-* 修改sdk的minSdkVersion到16
-
-## 1.0.34
-
-* 修复ios获取历史消息报错
-
-## 1.0.35
-
-* 修复安卓manifest配置冲突
-
-## 1.0.36
-
-* 修复Android设置好友自定义字段失败
-
-## 1.0.37
-
-* 信令补充invitee字段
-
-## 1.1.0
-
-* ios端消息实例新增seq字段
-
-## 2.0.0
-
-* 【重要】flutter升级到2.0,支持空安全
-
-## 2.0.1
-
-* 修复返回数据类型错误
-
-## 2.0.2
-
-* ios修复修改群资料报错
-
-## 2.0.3
-
-* ios修复修改群资料报错（二）
-
-## 2.0.4
-
-* ios/android，新增高级消息，发送文本消息sendTextMessage
-* android，修复sendCustomMessage不传递extension报错
-
-## 2.0.5
-
-* 修复会话isFinish的bug
-
-## 2.0.6
-
-* 修复事件监听传参
-
-
-## 3.0.0
-* 发送高级消息新增offlinePushInfo
-* 高级消息发送失败将失败的消息返回
-* 新增reSendMessage用做失败重发
-* 修改listener注册方式
-* 新增api sendTextAtMessage、sendLocationMessage、sendFaceMessage、sendMergerMessage、sendForwardMessage、setC2CReceiveMessageOpt
-setGroupReceiveMessageOpt、getC2CReceiveMessageOpt、getConversationListByConversaionIds、pinConversation、getTotalUnreadMessageCount、* tCloudCustomData、setLocalCustomInt、setLocalCustomData
-* 更换新包，上报、关键节点日志
-* 支持发送高级消息不计入未读数
-* V2TimMessage对象新增mergeElem、random、isExcludedFromUnreadCount
-* 提升性能，修改部分方法传参
-
-## 3.0.1
-* 修复若干问题
-
-## 3.0.2
-* 修复信令inviteID为空
-
-## 3.0.3
-* 修复信令接收回调异常
-
-## 3.0.4
-* 修复groupListener回调异常
-
-## 3.0.5
-* 修复信令回调异常
-
-## 3.0.6
-* 修复groupListener回调异常
-
-## 3.0.7
-* 修复已知问题
-
-## 3.0.8
-* ios修复直播群发送消息无返回的问题
-* ios修改createFriendGroup返回的字段名
-
-## 3.0.9
-* 修复groupListener回调异常
-
-## 3.1.0
-* 修复会话回调异常
-
-## 3.1.1
-* 修复sendForwardMessage bug
-
-## 3.1.2
-* ios修复发消息错误时返回的数据格式
-
-## 3.1.3
-* ios已知问题修复
-
-## 3.1.4
-* ios返回数据异常
-
-## 3.1.5
-* 获取群属性，keys字段改成非必传&去掉demo，demo请在官网直接体验和下载
-
-## 3.1.6
-* ios已知问题修复
-
-## 3.1.7
-* 新增接口getHistoryMessageListWithoutFormat
-
-## 3.1.8
-* 更新Android Native SDK到5.3.435
-* 新增接口getConversationListWithoutFormat
-* 修复信令接口crash
-
-## 3.1.9
-* 修改sdk压缩混淆选项
-
-## 3.2.0
-* 修复会话中lastMessage转化异常
-
-## 3.2.1
-* ios修复已知问题
-
-## 3.2.2
-* ios修复已知问题
-
-## 3.2.3
-* ios升级native sdk
-
-## 3.2.4
-* ios修复已知问题
-
-## 3.2.5
-* seq修改为string类型
-
-## 3.2.6
-* ios修复已知问题
-
-## 3.2.7
-* ios修复invite无推送的问题
-
-## 3.2.8
-* 修复invite参数
-
-## 3.2.9
-* 拉历史消息新增seq参数
-
-## 3.3.0
-* 修复iOSSound参数
-
-## 3.3.1
-* 修复已知问题
-
-## 3.3.2
-* Android权限修改
-
-## 3.3.3
-* 打包时支持混淆
-
-## 3.3.4
-* 修正path返回
-
-## 3.3.5
-* ios修复onSyncServerStart等事件
-
-## 3.3.6
-* ios bug修复
-
-## 3.3.7
-* ios bug修复
-
-## 3.3.8
-* ios 修复饭初始化crash
-
-## 3.3.9
-* 兼容firebase
-* 升级底层sdk
-
-## 3.4.0
-* 修复disable字段错误
-
-## 3.4.1
-* 修复群tips信息不完善
-
-## 3.4.2
-* disablePush字段对齐
-
-## 3.4.3
-* Hydra命名空间
-
-## 3.4.4
-* Hydra命名空间
-
-## 3.5.0
-* 新增接口
-* callExperimentalAPI 
-* clearC2CHistoryMessage
-* clearGroupHistoryMessage
-* searchLocalMessages
-* findMessages
-* searchGroups
-* searchGroupMembers
-* getSignalingInfo
-* addInvitedSignaling
-* searchFriends
-
-## 3.5.1
-* 数组越界兼容逻辑
-
-## 3.5.2
-* add web support
-
-## 3.5.3
-* 新增onTotalUnreadMessageCountChanged事件
-* V2TimConversation新增orderkey字段，用于会话排序
-
-## 3.5.4
-* 新增downloadMergeMesasge接口
-
-## 3.5.5
-* 架构调整
-
-## 3.5.6
-* 修复checkFriend失败问题
-* 修复getC2CHistoryMessageList无法获取后续消息问题
-
-## 3.6.0
-* 各个模块支持listener多次注册，多次回调
-* 新增api markAllMessageAsRead 设置全部会话已读
-* 新增组合消息解析
-* 升级native 版本至5.8.1668
-
-## 3.6.1
-* 修复文件进度事件丢失
-
-## 3.6.2
-* 修复移除高级消息未传uuid
-
-## 3.6.3
-* addFriend 接口优化: addType 由int 变更为 FriendTypeEnum
-* acceptFriendApplication 接口优化: acceptType 由int 变更为 FriendResponseTypeEnum
-* checkFriend 接口优化: checkType 由int 变更为 FriendTypeEnum
-* createGroup 接口优化: addOpt 由int 变更为 GroupAddOptTypeEnum
-* deleteFromFriendList 接口优化: deleteType 由int 变更为 FriendTypeEnum
-* getGroupMemberList 接口优化: filter 由int 变更为 GroupMemberFilterTypeEnum
-* getHistoryMessageList 接口优化: type 由int 变更为 HistoryMsgGetTypeEnum
-* getHistoryMessageListWithoutFormat 接口优化: type 由int 变更为 HistoryMsgGetTypeEnum
-* getGroupMemberList 接口优化: type 由int 变更为 GroupMemberFilterTypeEnum
-* getGroupMemberList 接口优化: filter 由int 变更为 GroupMemberFilterTypeEnum
-* initSDK 接口优化: loglevel 由int 变更为 LogLevelEnum
-* refuseFriendApplication 接口优化: acceptType 由int 变更为 FriendApplicationTypeEnum
-* sendCustomMessage 接口优化: priority 由int 变更为 MessagePriorityEnum
-* sendFaceMessage 接口优化: priority 由int 变更为 MessagePriorityEnum
-* sendFileMessage 接口优化: priority 由int 变更为 MessagePriorityEnum
-* sendForwardMessage 接口优化: priority 由int 变更为 MessagePriorityEnum
-* sendImageMessage 接口优化: priority 由int 变更为 MessagePriorityEnum
-* sendLocationMessage 接口优化: priority 由int 变更为 MessagePriorityEnum
-* sendMergerMessage 接口优化: priority 由int 变更为 MessagePriorityEnum
-* sendSoundMessage 接口优化: priority 由int 变更为 MessagePriorityEnum
-* sendTextAtMessage 接口优化: priority 由int 变更为 MessagePriorityEnum
-* sendTextMessage 接口优化: priority 由int 变更为 MessagePriorityEnum
-* setGroupMemberRole 接口优化: role 由int 变更为 GroupMemberRoleTypeEnum
-* 事件回调注册返回修改为异步
-
-
-## 3.6.4
-* 修复安卓异步注册事件无返回bug
-* 修复移除基础监听事件报错
-* 消息进度事件增加发送中的消息的uuid
-
-## 3.6.5
-* 修复java语法错误
-
-## 3.6.6
-* 添加消息回复接口
-* 修复web端release mode 下报错问题
-
-## 3.6.7
-* ios编译环境从8.0升到9.0
+## 3.8.7
+* Modify add friends enumeration

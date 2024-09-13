@@ -1,8 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:flutter/services.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_callback.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_callback.dart';
+import 'package:tencent_cloud_chat_sdk/tencent_cloud_chat_sdk_platform_interface.dart';
 
 /// 提供离线推送相关的接口
 ///
@@ -15,14 +14,6 @@ import 'package:tencent_im_sdk_plugin/models/v2_tim_callback.dart';
 /// {@category Manager}
 ///
 class V2TIMOfflinePushManager {
-  ///@nodoc
-  late MethodChannel _channel;
-
-  ///@nodoc
-  V2TIMOfflinePushManager(channel) {
-    _channel = channel;
-  }
-
   ///   设置离线推送配置信息
   ///
   /// 参数
@@ -30,31 +21,27 @@ class V2TIMOfflinePushManager {
   /// ```
   /// config	离线推送配置
   /// callback	回调
+  /// isTPNSToken 是否使用tpnstoken
   /// ```
   ///
   Future<V2TimCallback> setOfflinePushConfig({
     required double businessID,
     required String token,
+    bool isTPNSToken = false,
+    bool isVoip = false,
   }) async {
-    return V2TimCallback.fromJson(
-      formatJson(
-        await _channel.invokeMethod(
-          Platform.isIOS ? "setAPNS" : "setOfflinePushConfig",
-          buildParam(
-            {
-              "businessID": businessID,
-              "token": token,
-            },
-          ),
-        ),
-      ),
+    return TencentCloudChatSdkPlatform.instance.setOfflinePushConfig(
+      businessID: businessID,
+      token: token,
+      isTPNSToken: isTPNSToken,
+      isVoip: isVoip,
     );
   }
 
   /// APP 检测到应用退后台时可以调用此接口，可以用作桌面应用角标的初始化未读数量。
   ///
   /// ```
-  /// 从5.0.1（native）版本开始，如果配置了离线推送，会收到厂商的离线推送通道下发的通知栏消息。
+  /// 从5.0.1（native）版本开始，如果配置了离线推送，会收到厂商的离线推送通道下发的通知栏消息，注意：仅安卓端需要调用。
   /// ```
   ///
   /// 参数
@@ -66,24 +53,14 @@ class V2TIMOfflinePushManager {
   Future<V2TimCallback> doBackground({
     required int unreadCount,
   }) async {
-    return V2TimCallback.fromJson(
-      formatJson(
-        await _channel.invokeMethod(
-          "doBackground",
-          buildParam(
-            {
-              "unreadCount": unreadCount,
-            },
-          ),
-        ),
-      ),
-    );
+    return TencentCloudChatSdkPlatform.instance
+        .doBackground(unreadCount: unreadCount);
   }
 
   /// APP 检测到应用进前台时可以调用此接口
   ///
   /// ```
-  /// 从5.0.1（native）版本开始，对应 doBackground，会停止厂商的离线推送。但如果应用被 kill，仍然可以正常接收离线推送。
+  /// 从5.0.1（native）版本开始，对应 doBackground，会停止厂商的离线推送。但如果应用被 kill，仍然可以正常接收离线推送 注意：仅安卓端需要调用。
   /// ```
   ///
   /// 参数
@@ -92,16 +69,7 @@ class V2TIMOfflinePushManager {
   /// callback	回调
   /// ```
   Future<V2TimCallback> doForeground() async {
-    return V2TimCallback.fromJson(
-      formatJson(
-        await _channel.invokeMethod(
-          "doForeground",
-          buildParam(
-            {},
-          ),
-        ),
-      ),
-    );
+    return TencentCloudChatSdkPlatform.instance.doForeground();
   }
 
   ///@nodoc

@@ -54,4 +54,50 @@ public enum ListenerType {
     case onSendMessageProgress
 	case onSetAPPUnreadCount
     case onTotalUnreadMessageCountChanged
+    case onRecvMessageReadReceipts
+    case onRecvMessageModified
+    case onUserStatusChanged
+    case onConversationGroupCreated
+    case onConversationGroupDeleted
+    case onConversationGroupNameChanged
+    case onConversationsAddedToGroup
+    case onConversationsDeletedFromGroup
+    case onTopicCreated
+    case onTopicInfoChanged
+    case onTopicDeleted
+    case onLog
+    case onRecvMessageExtensionsChanged
+    case onRecvMessageExtensionsDeleted
+    case onMessageDownloadProgressCallback
+    case onGroupCounterChanged
+    case onExperimentalNotify
+    case onUserInfoChanged
+    case onAllReceiveMessageOptChanged
+    case onAllGroupMembersMuted
+    case onMemberMarkChanged
+    case onRecvMessageReactionsChanged
+    case onRecvMessageRevokedWithInfo
+    case onConversationDeleted
+    case onUnreadMessageCountChangedByFilter
+    case onConversationsDeleted
+    case onMutualFollowersListChanged
+    case onMyFollowersListChanged
+    case onMyFollowingListChanged
+    case onOfficialAccountDeleted
+    case onOfficialAccountInfoChanged
+    case onOfficialAccountSubscribed
+    case onOfficialAccountUnsubscribed
+    case onGroupMessagePinned
+    case onCreateTopic
+    case onDeleteTopic
+    case onChangeTopicInfo
+    case onReceiveTopicRESTCustomData
+    case onCreatePermissionGroup
+    case onDeletePermissionGroup
+    case onChangePermissionGroupInfo
+    case onAddMembersToPermissionGroup
+    case onRemoveMembersFromPermissionGroup
+    case onAddTopicPermission
+    case onDeleteTopicPermission
+    case onModifyTopicPermission
 }

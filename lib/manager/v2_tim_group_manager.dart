@@ -1,23 +1,29 @@
+// ignore_for_file: unused_field
+
 import 'dart:convert';
 
-import 'package:flutter/services.dart';
-import 'package:tencent_im_sdk_plugin/enum/group_add_opt_enum.dart';
-import 'package:tencent_im_sdk_plugin/enum/group_application_type_enum.dart';
-import 'package:tencent_im_sdk_plugin/enum/group_member_filter_enum.dart';
-import 'package:tencent_im_sdk_plugin/enum/group_member_role_enum.dart';
-import 'package:tencent_im_sdk_plugin/enum/utils.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_callback.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_group_application_result.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_group_info.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_group_info_result.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_group_member_full_info.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_group_member_info_result.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_group_member_operation_result.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_group_member_search_param.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_group_member_search_result.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_group_search_param.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_value_callback.dart';
-import 'package:tencent_im_sdk_plugin_platform_interface/im_flutter_plugin_platform_interface.dart';
+import 'package:tencent_cloud_chat_sdk/enum/group_add_opt_enum.dart';
+import 'package:tencent_cloud_chat_sdk/enum/group_application_type_enum.dart';
+import 'package:tencent_cloud_chat_sdk/enum/group_member_filter_enum.dart';
+import 'package:tencent_cloud_chat_sdk/enum/group_member_role_enum.dart';
+import 'package:tencent_cloud_chat_sdk/enum/group_type.dart';
+import 'package:tencent_cloud_chat_sdk/enum/utils.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_callback.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_group_application_result.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_group_info.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_group_info_result.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_group_member_full_info.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_group_member_info_result.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_group_member_operation_result.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_group_member_search_param.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_group_member_search_result.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_group_search_param.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_value_callback.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_group_member.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_topic_info.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_topic_info_result.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_topic_operation_result.dart';
+import 'package:tencent_cloud_chat_sdk/tencent_cloud_chat_sdk_platform_interface.dart';
 
 /// 群组高级接口，包含了群组的高级功能，例如群成员邀请、非群成员申请进群等操作接口。
 ///
@@ -68,14 +74,6 @@ import 'package:tencent_im_sdk_plugin_platform_interface/im_flutter_plugin_platf
 /// {@category Manager}
 ///
 class V2TIMGroupManager {
-  ///@nodoc
-  late MethodChannel _channel;
-
-  ///@nodoc
-  V2TIMGroupManager(channel) {
-    _channel = channel;
-  }
-
   ///创建自定义群组（高级版本：可以指定初始的群成员）
   ///
   /// 参数
@@ -89,6 +87,7 @@ class V2TIMGroupManager {
   ///
   /// ```
   /// 其他限制请参考V2TIMManager.createGroup注释
+  /// isSupportTopic 仅对社群有效
   /// ```
   Future<V2TimValueCallback<String>> createGroup({
     String? groupID,
@@ -98,10 +97,25 @@ class V2TIMGroupManager {
     String? introduction,
     String? faceUrl,
     bool? isAllMuted,
+    bool? isSupportTopic = false,
     GroupAddOptTypeEnum? addOpt,
-    List<Map>? memberList,
+    List<V2TimGroupMember>? memberList,
+    GroupAddOptTypeEnum? approveOpt,
+    bool? isEnablePermissionGroup,
+    int? defaultPermissions,
   }) async {
-    return ImFlutterPlatform.instance.createGroup(
+    // add a default number.
+    GroupAddOptTypeEnum addOptDefault = addOpt == null
+        ? GroupAddOptTypeEnum.V2TIM_GROUP_ADD_ANY
+        : (groupType == GroupType.AVChatRoom
+            ? GroupAddOptTypeEnum.V2TIM_GROUP_ADD_ANY
+            : addOpt);
+    GroupAddOptTypeEnum approveOptDefault = approveOpt == null
+        ? GroupAddOptTypeEnum.V2TIM_GROUP_ADD_FORBID
+        : (groupType == GroupType.AVChatRoom
+            ? GroupAddOptTypeEnum.V2TIM_GROUP_ADD_FORBID
+            : approveOpt);
+    return TencentCloudChatSdkPlatform.instance.createGroup(
       groupType: groupType,
       groupName: groupName,
       groupID: groupID,
@@ -109,8 +123,12 @@ class V2TIMGroupManager {
       introduction: introduction,
       faceUrl: faceUrl,
       isAllMuted: isAllMuted,
-      addOpt: EnumUtils.convertGroupAddOptEnum(addOpt),
+      addOpt: addOptDefault.index,
       memberList: memberList,
+      isSupportTopic: isSupportTopic,
+      approveOpt: approveOptDefault.index,
+      isEnablePermissionGroup: isEnablePermissionGroup,
+      defaultPermissions: defaultPermissions,
     );
   }
 
@@ -123,7 +141,7 @@ class V2TIMGroupManager {
   /// 该接口有频限检测，SDK 限制调用频率为1 秒 10 次，超过限制后会报 ERR_SDK_COMM_API_CALL_FREQUENCY_LIMIT （7008）错误
   /// ```
   Future<V2TimValueCallback<List<V2TimGroupInfo>>> getJoinedGroupList() async {
-    return ImFlutterPlatform.instance.getJoinedGroupList();
+    return TencentCloudChatSdkPlatform.instance.getJoinedGroupList();
   }
 
   /// 拉取群资料
@@ -136,11 +154,14 @@ class V2TIMGroupManager {
   Future<V2TimValueCallback<List<V2TimGroupInfoResult>>> getGroupsInfo({
     required List<String> groupIDList,
   }) async {
-    return ImFlutterPlatform.instance.getGroupsInfo(groupIDList: groupIDList);
+    return TencentCloudChatSdkPlatform.instance
+        .getGroupsInfo(groupIDList: groupIDList);
   }
 
   ///修改群资料
   ///
+  ///参数：
+  ///[V2TimGroupInfo]  群资料参数
   Future<V2TimCallback> setGroupInfo({
     // required String groupID,
     // String? groupType,
@@ -153,7 +174,7 @@ class V2TIMGroupManager {
     // Map<String, String>? customInfo,
     required V2TimGroupInfo info,
   }) async {
-    return ImFlutterPlatform.instance.setGroupInfo(info: info);
+    return TencentCloudChatSdkPlatform.instance.setGroupInfo(info: info);
   }
 
   /// 这个接口移到messageManager下面去了，2020-6-4
@@ -162,7 +183,7 @@ class V2TIMGroupManager {
   /// 参数
   ///
   /// ```
-  /// opt	三种类型的消息接收选项： V2TIMGroupInfo.V2TIM_GROUP_RECEIVE_MESSAGE：在线正常接收消息，离线时会有厂商的离线推送通知 V2TIMGroupInfo.V2TIM_GROUP_NOT_RECEIVE_MESSAGE：不会接收到群消息 V2TIMGroupInfo.V2TIM_GROUP_RECEIVE_NOT_NOTIFY_MESSAGE：在线正常接收消息，离线不会有推送通知
+  /// opt	三种类型的消息接收选项： ReceiveMsgOptEnum.V2TIM_GROUP_RECEIVE_MESSAGE：在线正常接收消息，离线时会有厂商的离线推送通知 ReceiveMsgOptEnum.V2TIM_GROUP_NOT_RECEIVE_MESSAGE：不会接收到群消息 ReceiveMsgOptEnum.V2TIM_GROUP_RECEIVE_NOT_NOTIFY_MESSAGE：在线正常接收消息，离线不会有推送通知
   /// ```
   // Future<V2TimCallback> setReceiveMessageOpt({
   //   required String groupID,
@@ -201,7 +222,7 @@ class V2TIMGroupManager {
     required String groupID,
     required Map<String, String> attributes,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .initGroupAttributes(groupID: groupID, attributes: attributes);
   }
 
@@ -211,7 +232,7 @@ class V2TIMGroupManager {
     required String groupID,
     required Map<String, String> attributes,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .setGroupAttributes(groupID: groupID, attributes: attributes);
   }
 
@@ -221,7 +242,7 @@ class V2TIMGroupManager {
     required String groupID,
     required List<String> keys,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .deleteGroupAttributes(groupID: groupID, keys: keys);
   }
 
@@ -231,16 +252,20 @@ class V2TIMGroupManager {
     required String groupID,
     List<String>? keys,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .getGroupAttributes(groupID: groupID, keys: keys);
   }
 
-  ///获取指定群属性，keys 传 null 则获取所有群属性。
-  ///
+  ///获取指定群在线人数
+  ///请注意：
+  ///```
+  ///目前只支持：直播群（AVChatRoom）。
+  ///该接口有频限检测，SDK 限制调用频率为60秒1次。
+  ///```
   Future<V2TimValueCallback<int>> getGroupOnlineMemberCount({
     required String groupID,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .getGroupOnlineMemberCount(groupID: groupID);
   }
 
@@ -250,10 +275,10 @@ class V2TIMGroupManager {
   ///
   /// ```
   /// filter	指定群成员类型
-  /// V2TIMGroupMemberFullInfo.V2TIM_GROUP_MEMBER_FILTER_ALL：所有类型
-  /// V2TIMGroupMemberFullInfo.V2TIM_GROUP_MEMBER_FILTER_OWNER：群主
-  /// V2TIMGroupMemberFullInfo.V2TIM_GROUP_MEMBER_FILTER_ADMIN：群管理员
-  /// V2TIMGroupMemberFullInfo.V2TIM_GROUP_MEMBER_FILTER_COMMON：普通群成员
+  /// GroupMemberFilterTypeEnum.V2TIM_GROUP_MEMBER_FILTER_ALL：所有类型
+  /// GroupMemberFilterTypeEnum.V2TIM_GROUP_MEMBER_FILTER_OWNER：群主
+  /// GroupMemberFilterTypeEnum.V2TIM_GROUP_MEMBER_FILTER_ADMIN：群管理员
+  /// GroupMemberFilterTypeEnum.V2TIM_GROUP_MEMBER_FILTER_COMMON：普通群成员
   /// nextSeq	分页拉取标志，第一次拉取填0，回调成功如果 nextSeq 不为零，需要分页，传入再次拉取，直至为0。
   /// ```
   /// 注意
@@ -275,9 +300,9 @@ class V2TIMGroupManager {
     int count = 15,
     int offset = 0,
   }) async {
-    return ImFlutterPlatform.instance.getGroupMemberList(
+    return TencentCloudChatSdkPlatform.instance.getGroupMemberList(
         groupID: groupID,
-        filter: EnumUtils.convertGroupMemberFilterEnum(filter),
+        filter: filter.index,
         nextSeq: nextSeq,
         count: count,
         offset: offset);
@@ -290,7 +315,7 @@ class V2TIMGroupManager {
     required String groupID,
     required List<String> memberList,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .getGroupMembersInfo(groupID: groupID, memberList: memberList);
   }
 
@@ -302,7 +327,7 @@ class V2TIMGroupManager {
     String? nameCard,
     Map<String, String>? customInfo,
   }) async {
-    return ImFlutterPlatform.instance.setGroupMemberInfo(
+    return TencentCloudChatSdkPlatform.instance.setGroupMemberInfo(
       groupID: groupID,
       userID: userID,
       nameCard: nameCard,
@@ -317,7 +342,7 @@ class V2TIMGroupManager {
     required String userID,
     required int seconds,
   }) async {
-    return ImFlutterPlatform.instance.muteGroupMember(
+    return TencentCloudChatSdkPlatform.instance.muteGroupMember(
       groupID: groupID,
       userID: userID,
       seconds: seconds,
@@ -338,7 +363,7 @@ class V2TIMGroupManager {
     required String groupID,
     required List<String> userList,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .inviteUserToGroup(groupID: groupID, userList: userList);
   }
 
@@ -354,10 +379,14 @@ class V2TIMGroupManager {
   Future<V2TimCallback> kickGroupMember({
     required String groupID,
     required List<String> memberList,
+    int? duration,
     String? reason,
   }) async {
-    return ImFlutterPlatform.instance
-        .kickGroupMember(groupID: groupID, memberList: memberList);
+    return TencentCloudChatSdkPlatform.instance.kickGroupMember(
+      groupID: groupID,
+      memberList: memberList,
+      duration: duration,
+    );
   }
 
   /// 切换群成员的角色。
@@ -380,10 +409,12 @@ class V2TIMGroupManager {
     required String userID,
     required GroupMemberRoleTypeEnum role,
   }) async {
-    return ImFlutterPlatform.instance.setGroupMemberRole(
+    return TencentCloudChatSdkPlatform.instance.setGroupMemberRole(
         groupID: groupID,
         userID: userID,
-        role: EnumUtils.convertGroupMemberRoleTypeEnum(role));
+        role: EnumUtils.convertGroupMemberRoleTypeEnum(
+          role,
+        ));
   }
 
   /// 转让群主
@@ -398,7 +429,7 @@ class V2TIMGroupManager {
     required String groupID,
     required String userID,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .transferGroupOwner(groupID: groupID, userID: userID);
   }
 
@@ -408,7 +439,7 @@ class V2TIMGroupManager {
   ///
   Future<V2TimValueCallback<V2TimGroupApplicationResult>>
       getGroupApplicationList() async {
-    return ImFlutterPlatform.instance.getGroupApplicationList();
+    return TencentCloudChatSdkPlatform.instance.getGroupApplicationList();
   }
 
   ///同意某一条加群申请
@@ -425,21 +456,28 @@ class V2TIMGroupManager {
     GroupApplicationTypeEnum? type,
     String? webMessageInstance,
   }) async {
-    return ImFlutterPlatform.instance.acceptGroupApplication(
+    return TencentCloudChatSdkPlatform.instance.acceptGroupApplication(
       groupID: groupID,
       reason: reason,
       fromUser: fromUser,
       toUser: toUser,
       addTime: addTime,
-      type: EnumUtils.convertGroupApplicationTypeEnum(type),
+      type: type?.index,
       webMessageInstance: webMessageInstance,
     );
   }
 
   ///拒绝某一条加群申请
   ///
+  ///参数：
+  ///webMessageInstance [web端实例](https://web.sdk.qcloud.com/im/doc/zh-cn/SDK.html#handleGroupApplication)
+  ///type [GroupApplicationTypeEnum] 群未决请求类型
+  ///fromUser  请求者ID
+  ///toUser 获取处理者 ID, 请求加群:0，邀请加群:被邀请人
+  ///addTime 获取群未决添加的时间
+  ///```
   ///web 端使用时必须传入webMessageInstance 字段。 对应【群系统通知】的消息实例
-  ///
+  ///```
   Future<V2TimCallback> refuseGroupApplication({
     required String groupID,
     String? reason,
@@ -449,12 +487,12 @@ class V2TIMGroupManager {
     required GroupApplicationTypeEnum type,
     String? webMessageInstance,
   }) async {
-    return ImFlutterPlatform.instance.refuseGroupApplication(
+    return TencentCloudChatSdkPlatform.instance.refuseGroupApplication(
         groupID: groupID,
         fromUser: fromUser,
         toUser: toUser,
         addTime: addTime,
-        type: EnumUtils.convertGroupApplicationTypeEnum(type) as int,
+        type: type.index,
         webMessageInstance: webMessageInstance);
   }
 
@@ -463,28 +501,38 @@ class V2TIMGroupManager {
   /// web 不支持
   ///
   Future<V2TimCallback> setGroupApplicationRead() async {
-    return ImFlutterPlatform.instance.setGroupApplicationRead();
+    return TencentCloudChatSdkPlatform.instance.setGroupApplicationRead();
   }
 
-  /// 搜索群资料
+  /// 搜索群资料(需要您购买旗舰套餐)
   ///
+  ///参数：
+  ///searchParam	搜索参数([V2TimGroupSearchParam])
+  ///```
+  ///SDK 会搜索群名称包含于关键字列表 keywordList 的所有群并返回群信息列表。关键字列表最多支持5个。
   /// web 不支持关键字搜索搜索, 请使用searchGroupByID
-  ///
+  ///```
   Future<V2TimValueCallback<List<V2TimGroupInfo>>> searchGroups({
     required V2TimGroupSearchParam searchParam,
   }) async {
-    return ImFlutterPlatform.instance.searchGroups(searchParam: searchParam);
+    return TencentCloudChatSdkPlatform.instance
+        .searchGroups(searchParam: searchParam);
   }
 
-  /// 搜索群成员
-  /// TODO这里安卓和ios有差异化，ios能根据组名返回key:list但 安卓但key是""为空，我设为default
-  ///
+  /// ## 搜索群成员
+  /// `TODO这里安卓和ios有差异化，ios能根据组名返回key:list但 安卓但key是""为空，我设为default`
+  ///参数：
+  /// - searchParam	搜索参数([V2TimGroupSearchParam])
+  ///```
+  ///SDK 会在本地搜索指定群 ID 列表中，群成员信息（名片、好友备注、昵称、userID）包含于关键字列表 keywordList 的所有群成员并返回群 ID 和群成员列表的 map，关键字列表最多支持5个。
   /// web 不支持搜索
+  /// ```
   ///
   Future<V2TimValueCallback<V2GroupMemberInfoSearchResult>> searchGroupMembers({
     required V2TimGroupMemberSearchParam param,
   }) async {
-    return ImFlutterPlatform.instance.searchGroupMembers(param: param);
+    return TencentCloudChatSdkPlatform.instance
+        .searchGroupMembers(param: param);
   }
 
   /// 通过 groupID 搜索群组
@@ -494,7 +542,162 @@ class V2TIMGroupManager {
   Future<V2TimValueCallback<V2TimGroupInfo>> searchGroupByID({
     required String groupID,
   }) async {
-    return ImFlutterPlatform.instance.searchGroupByID(groupID: groupID);
+    return TencentCloudChatSdkPlatform.instance
+        .searchGroupByID(groupID: groupID);
+  }
+
+  /// 获取当前用户已经加入的支持话题的社群列表
+  /// 4.0.1及以上版本支持
+  /// web版本不支持
+  ///
+  Future<V2TimValueCallback<List<V2TimGroupInfo>>>
+      getJoinedCommunityList() async {
+    return TencentCloudChatSdkPlatform.instance.getJoinedCommunityList();
+  }
+
+  /// 创建话题
+  /// 4.0.1及以上版本支持
+  /// web版本不支持
+  ///
+  Future<V2TimValueCallback<String>> createTopicInCommunity({
+    required String groupID,
+    required V2TimTopicInfo topicInfo,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance.createTopicInCommunity(
+      groupID: groupID,
+      topicInfo: topicInfo,
+    );
+  }
+
+  /// 删除话题
+  /// 4.0.1及以上版本支持
+  /// web版本不支持
+  ///
+  Future<V2TimValueCallback<List<V2TimTopicOperationResult>>>
+      deleteTopicFromCommunity({
+    required String groupID,
+    required List<String> topicIDList,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .deleteTopicFromCommunity(groupID: groupID, topicIDList: topicIDList);
+  }
+
+  /// 删除话题
+  /// 4.0.1及以上版本支持
+  /// web版本不支持
+  ///
+  Future<V2TimCallback> setTopicInfo({
+    required String groupID,
+    required V2TimTopicInfo topicInfo,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance.setTopicInfo(
+      topicInfo: topicInfo,
+      groupID: groupID,
+    );
+  }
+
+  /// 获取话题列表。
+  /// 4.0.1及以上版本支持
+  /// web版本不支持
+  ///
+  Future<V2TimValueCallback<List<V2TimTopicInfoResult>>> getTopicInfoList({
+    required String groupID,
+    required List<String> topicIDList,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .getTopicInfoList(groupID: groupID, topicIDList: topicIDList);
+  }
+
+  /// 设置群计数器（5.0.8 及其以上版本支持）
+  /// 注意
+  /// 该计数器的 key 如果存在，则直接更新计数器的 value 值；如果不存在，则添加该计数器的 key-value；
+  /// 当群计数器设置成功后，在 succ 回调中会返回最终成功设置的群计数器信息；
+  /// 除了社群和话题，群计数器支持所有的群组类型。
+  ///
+  Future<V2TimValueCallback<Map<String, int>>> setGroupCounters({
+    required String groupID,
+    required Map<String, int> counters,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance.setGroupCounters(
+      groupID: groupID,
+      counters: counters,
+    );
+  }
+
+  /// 获取群计数器（5.0.8 及其以上版本支持）
+  ///
+  /// 注意
+  /// 如果 keys 为空，则表示获取群内的所有计数器；
+  /// 除了社群和话题，群计数器支持所有的群组类型。
+  ///
+  Future<V2TimValueCallback<Map<String, int>>> getGroupCounters({
+    required String groupID,
+    required List<String> keys,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance.getGroupCounters(
+      groupID: groupID,
+      keys: keys,
+    );
+  }
+
+  /// 递增群计数器（5.0.8 及其以上版本支持）
+  ///
+  ///   参数
+  /// groupID	群 ID
+  /// key	群计数器的 key
+  /// value	群计数器的递增的变化量，计数器 key 对应的 value 变更方式为： new_value = old_value + value
+  /// 注意
+  /// 成功后的回调，会返回当前计数器做完递增操作后的 value
+  /// 该计数器的 key 如果存在，则直接在当前值的基础上根据传入的 value 作递增操作；反之，添加 key，并在默认值为 0 的基础上根据传入的 value 作递增操作；
+  /// 除了社群和话题，群计数器支持所有的群组类型。
+  ///
+  Future<V2TimValueCallback<Map<String, int>>> increaseGroupCounter({
+    required String groupID,
+    required String key,
+    required int value,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance.increaseGroupCounter(
+      groupID: groupID,
+      key: key,
+      value: value,
+    );
+  }
+
+  /// 递减群计数器（7.0 及其以上版本支持）
+  ///
+  /// 参数
+  /// groupID	群 ID
+  /// key	群计数器的 key
+  /// value	群计数器的递减的变化量，计数器 key 对应的 value 变更方式为： new_value = old_value - value
+  /// 注意
+  /// 成功后的回调，会返回当前计数器做完递减操作后的 value
+  /// 该计数器的 key 如果存在，则直接在当前值的基础上根据传入的 value 作递减操作；反之，添加 key，并在默认值为 0 的基础上根据传入的 value 作递减操作
+  /// 除了社群和话题，群计数器支持所有的群组类型。
+  ///
+  Future<V2TimValueCallback<Map<String, int>>> decreaseGroupCounter({
+    required String groupID,
+    required String key,
+    required int value,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance.decreaseGroupCounter(
+      groupID: groupID,
+      key: key,
+      value: value,
+    );
+  }
+
+  Future<V2TimCallback> markGroupMemberList({
+    required String groupID,
+    required List<String> memberIDList,
+    required int markType,
+    required bool enableMark,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance.markGroupMemberList(
+      groupID: groupID,
+      memberIDList: memberIDList,
+      markType: markType,
+      enableMark: enableMark,
+    );
   }
 
   ///@nodoc

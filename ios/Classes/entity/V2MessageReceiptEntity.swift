@@ -1,5 +1,5 @@
 import Foundation
-import  ImSDK_Plus
+import ImSDK_Plus
 
 /// 自定义消息响应实体
 class V2MessageReceiptEntity: V2TIMMessageReceipt {
@@ -9,6 +9,11 @@ class V2MessageReceiptEntity: V2TIMMessageReceipt {
         var result: [String: Any] = [:];
         result["userID"] = info.userID;
         result["timestamp"] = info.timestamp;
+        result["groupID"] = info.groupID;
+        result["msgID"] = info.msgID;
+        result["readCount"] = info.readCount;
+        result["unreadCount"] = info.unreadCount;
+        result["isPeerRead"] = info.isPeerRead;
         return result;
     }
 }

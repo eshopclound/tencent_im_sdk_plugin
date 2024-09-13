@@ -1,14 +1,13 @@
 import 'dart:collection';
-import 'dart:convert';
 
-import 'package:flutter/services.dart';
-import 'package:tencent_im_sdk_plugin/enum/V2TimConversationListener.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_callback.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_conversation.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_conversation_result.dart';
-import 'package:tencent_im_sdk_plugin/models/v2_tim_value_callback.dart';
-import 'package:tencent_im_sdk_plugin_platform_interface/im_flutter_plugin_platform_interface.dart';
-import 'package:uuid/uuid.dart';
+import 'package:tencent_cloud_chat_sdk/enum/V2TimConversationListener.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_callback.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_conversation.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_conversation_filter.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_conversation_operation_result.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_conversation_result.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_value_callback.dart';
+import 'package:tencent_cloud_chat_sdk/tencent_cloud_chat_sdk_platform_interface.dart';
 
 /// 会话接口，包含了会话的获取，删除和更新的逻辑
 ///
@@ -23,22 +22,25 @@ import 'package:uuid/uuid.dart';
 /// {@category Manager}
 ///
 class V2TIMConversationManager {
-  ///@nodoc
-  late MethodChannel _channel;
-
-  Map<String, V2TimConversationListener> conversationListenerList = {};
-
-  ///@nodoc
-  V2TIMConversationManager(channel) {
-    this._channel = channel;
-  }
   Future<void> setConversationListener({
     required V2TimConversationListener listener,
   }) {
-    final String uuid = Uuid().v4();
-    this.conversationListenerList[uuid] = listener;
-    return ImFlutterPlatform.instance
-        .setConversationListener(listener: listener, listenerUuid: uuid);
+    return TencentCloudChatSdkPlatform.instance
+        .setConversationListener(listener: listener);
+  }
+
+  Future<void> addConversationListener({
+    required V2TimConversationListener listener,
+  }) {
+    return TencentCloudChatSdkPlatform.instance
+        .addConversationListener(listener: listener);
+  }
+
+  Future<void> removeConversationListener(
+      {V2TimConversationListener? listener}) {
+    return TencentCloudChatSdkPlatform.instance.removeConversationListener(
+      listener: listener,
+    );
   }
 
   ///   获取会话列表
@@ -61,7 +63,7 @@ class V2TIMConversationManager {
     required String nextSeq,
     required int count,
   }) async {
-    return ImFlutterPlatform.instance.getConversationList(
+    return TencentCloudChatSdkPlatform.instance.getConversationList(
       nextSeq: nextSeq,
       count: count,
     );
@@ -72,14 +74,10 @@ class V2TIMConversationManager {
     required String nextSeq,
     required int count,
   }) async {
-    return await _channel.invokeMethod(
-      "getConversationList",
-      buildParam(
-        {
-          "nextSeq": nextSeq,
-          "count": count,
-        },
-      ),
+    return TencentCloudChatSdkPlatform.instance
+        .getConversationListWithoutFormat(
+      nextSeq: nextSeq,
+      count: count,
     );
   }
 
@@ -89,8 +87,9 @@ class V2TIMConversationManager {
       getConversationListByConversaionIds({
     required List<String> conversationIDList,
   }) async {
-    return ImFlutterPlatform.instance.getConversationListByConversaionIds(
-        conversationIDList: conversationIDList);
+    return TencentCloudChatSdkPlatform.instance
+        .getConversationListByConversaionIds(
+            conversationIDList: conversationIDList);
   }
 
   /// 会话置顶
@@ -99,14 +98,14 @@ class V2TIMConversationManager {
     required String conversationID,
     required bool isPinned,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .pinConversation(conversationID: conversationID, isPinned: isPinned);
   }
 
   /// 获取会话未读总数
   ///
   Future<V2TimValueCallback<int>> getTotalUnreadMessageCount() async {
-    return ImFlutterPlatform.instance.getTotalUnreadMessageCount();
+    return TencentCloudChatSdkPlatform.instance.getTotalUnreadMessageCount();
   }
 
   /// 获取指定会话
@@ -121,7 +120,7 @@ class V2TIMConversationManager {
   Future<V2TimValueCallback<V2TimConversation>> getConversation({
     /*required*/ required String conversationID,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .getConversation(conversationID: conversationID);
   }
 
@@ -137,7 +136,7 @@ class V2TIMConversationManager {
   Future<V2TimCallback> deleteConversation({
     /*required*/ required String conversationID,
   }) async {
-    return ImFlutterPlatform.instance
+    return TencentCloudChatSdkPlatform.instance
         .deleteConversation(conversationID: conversationID);
   }
 
@@ -154,20 +153,171 @@ class V2TIMConversationManager {
   ///
   Future<V2TimCallback> setConversationDraft({
     required String conversationID,
-    String? draftText,
+    String? draftText = "",
   }) async {
-    return ImFlutterPlatform.instance.setConversationDraft(
+    return TencentCloudChatSdkPlatform.instance.setConversationDraft(
         conversationID: conversationID, draftText: draftText);
   }
 
-  ///@nodoc
-  Map buildParam(Map param) {
-    param["TIMManagerName"] = "conversationManager";
-    return param;
+  /// 创建好友分组
+  /// 4.0.8及以后版本支持，web不支持
+  /// 会话分组最大支持 20 个，不再使用的分组请及时删除。
+  ///
+  Future<V2TimValueCallback<List<V2TimConversationOperationResult>>>
+      setConversationCustomData({
+    required String customData,
+    required List<String> conversationIDList,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance.setConversationCustomData(
+        customData: customData, conversationIDList: conversationIDList);
   }
 
-  ///@nodoc
-  formatJson(jsonSrc) {
-    return json.decode(json.encode(jsonSrc));
+  /// 高级获取会话接口
+  ///
+  Future<V2TimValueCallback<V2TimConversationResult>>
+      getConversationListByFilter({
+    required V2TimConversationFilter filter,
+    required int nextSeq,
+    required int count,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance.getConversationListByFilter(
+      filter: filter,
+      nextSeq: nextSeq,
+      count: count,
+    );
+  }
+
+  /// 标记会话
+  /// 4.0.8及以后版本支持，web不支持，且应用为旗舰版
+  /// 会话分组最大支持 20 个，不再使用的分组请及时删除。
+  /// 如果已有标记不能满足您的需求，您可以自定义扩展标记，扩展标记需要满足以下两个条件：
+  /// 1、扩展标记值不能和 V2TIMConversation 已有的标记值冲突
+  /// 扩展标记值必须是 0x1L << n 的位移值（32 <= n < 64，即 n 必须大于等于 32 并且小于 64），比如自定义 0x1L << 32 标记值表示 "iPhone 在线"
+  /// 扩展标记值不能设置为 0x1 << 32，要设置为 0x1L << 32，明确告诉编译器是 64 位的整型常量
+  /// flutter中使用markType可参考 V2TimConversationMarkType
+  ///
+  Future<V2TimValueCallback<List<V2TimConversationOperationResult>>>
+      markConversation({
+    required int markType,
+    required bool enableMark,
+    required List<String> conversationIDList,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance.markConversation(
+        markType: markType,
+        enableMark: enableMark,
+        conversationIDList: conversationIDList);
+  }
+
+  /// 创建好友分组
+  /// 4.0.8及以后版本支持，web不支持
+  /// 会话分组最大支持 20 个，不再使用的分组请及时删除。
+  ///
+  Future<V2TimValueCallback<List<V2TimConversationOperationResult>>>
+      createConversationGroup({
+    required String groupName,
+    required List<String> conversationIDList,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance.createConversationGroup(
+        groupName: groupName, conversationIDList: conversationIDList);
+  }
+
+  /// 获取会话分组列表
+  /// 4.0.8及以后版本支持，web不支持
+  ///
+  Future<V2TimValueCallback<List<String>>> getConversationGroupList() async {
+    return TencentCloudChatSdkPlatform.instance.getConversationGroupList();
+  }
+
+  /// 删除会话分组
+  /// 4.0.8及以后版本支持，web不支持
+  ///
+  Future<V2TimCallback> deleteConversationGroup({
+    required String groupName,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .deleteConversationGroup(groupName: groupName);
+  }
+
+  /// 重命名会话分组
+  /// 4.0.8及以后版本支持，web不支持
+  ///
+  Future<V2TimCallback> renameConversationGroup({
+    required String oldName,
+    required String newName,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance.renameConversationGroup(
+      oldName: oldName,
+      newName: newName,
+    );
+  }
+
+  /// 添加会话到一个会话分组
+  /// 4.0.8及以后版本支持，web不支持
+  ///
+  Future<V2TimValueCallback<List<V2TimConversationOperationResult>>>
+      addConversationsToGroup({
+    required String groupName,
+    required List<String> conversationIDList,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance.addConversationsToGroup(
+      groupName: groupName,
+      conversationIDList: conversationIDList,
+    );
+  }
+
+  /// 从一个会话分组中删除会话
+  /// 4.0.8及以后版本支持，web不支持
+  ///
+  Future<V2TimValueCallback<List<V2TimConversationOperationResult>>>
+      deleteConversationsFromGroup({
+    required String groupName,
+    required List<String> conversationIDList,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance.deleteConversationsFromGroup(
+      groupName: groupName,
+      conversationIDList: conversationIDList,
+    );
+  }
+
+  Future<V2TimValueCallback<List<V2TimConversationOperationResult>>>
+      deleteConversationList({
+    required List<String> conversationIDList,
+    required bool clearMessage,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance.deleteConversationList(
+        conversationIDList: conversationIDList, clearMessage: clearMessage);
+  }
+
+  Future<V2TimValueCallback<int>> getUnreadMessageCountByFilter({
+    required V2TimConversationFilter filter,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .getUnreadMessageCountByFilter(filter: filter);
+  }
+
+  Future<V2TimCallback> subscribeUnreadMessageCountByFilter({
+    required V2TimConversationFilter filter,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .subscribeUnreadMessageCountByFilter(filter: filter);
+  }
+
+  Future<V2TimCallback> unsubscribeUnreadMessageCountByFilter({
+    required V2TimConversationFilter filter,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .unsubscribeUnreadMessageCountByFilter(filter: filter);
+  }
+
+  Future<V2TimCallback> cleanConversationUnreadMessageCount({
+    required String conversationID,
+    required int cleanTimestamp,
+    required int cleanSequence,
+  }) async {
+    return TencentCloudChatSdkPlatform.instance
+        .cleanConversationUnreadMessageCount(
+            conversationID: conversationID,
+            cleanTimestamp: cleanTimestamp,
+            cleanSequence: cleanSequence);
   }
 }

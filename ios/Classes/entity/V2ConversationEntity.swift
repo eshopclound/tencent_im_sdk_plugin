@@ -22,6 +22,18 @@ class V2ConversationEntity: V2TIMConversation {
         result["test"] = nil;
 		result["isPinned"] = info.isPinned;
         result["orderkey"] = info.orderKey;
+        
+        
+        var markList:[Int64] = [];
+        
+        info.markList.forEach { markn in
+            markList.append(markn.int64Value)
+        }
+        result["markList"] = markList;
+        result["customData"] = String.init(data: info.customData, encoding: String.Encoding.utf8) ?? "";
+        result["conversationGroupList"] = info.conversationGroupList;
+        result["c2cReadTimestamp"] = info.c2cReadTimestamp;
+        result["groupReadSequence"] = info.groupReadSequence;
 		if info.lastMessage != nil {
 			result["lastMessage"] = V2MessageEntity(message: info.lastMessage).getDict(progress: 100)
 		}
